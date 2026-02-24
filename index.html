@@ -3,67 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Impostor Firebase</title>
+    <title>Impostor Firebase Fix</title>
+    
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    
+
     <style>
-        body { background-color: #1a1a1a; font-family: sans-serif; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background: #fff; color: #333; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; }
+        body { background-color: #1a1a1a; font-family: 'Segoe UI', sans-serif; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: #fff; color: #333; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .hidden { display: none !important; }
-        input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; margin-top: 10px; }
-        .btn-primary { background: #007bff; color: white; }
-        .btn-success { background: #28a745; color: white; }
-        .player-list { text-align: left; background: #f0f0f0; padding: 10px; border-radius: 5px; }
-        .status-tag { font-size: 0.8em; color: #666; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 14px; cursor: pointer; border: none; border-radius: 8px; font-weight: bold; margin-top: 10px; transition: 0.2s; }
+        .btn-blue { background: #007bff; color: white; }
+        .btn-green { background: #28a745; color: white; }
+        .player-list { text-align: left; background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #eee; }
     </style>
 </head>
 <body>
 
     <div id="startScreen" class="container">
-        <h1>Impostor Online</h1>
-        <input type="text" id="userName" placeholder="Twoje imię">
-        <input type="text" id="gameIdInput" placeholder="Kod pokoju (np. 123)">
-        <button class="btn-primary" onclick="joinGame()">Dołącz / Stwórz Grę</button>
+        <h1 style="color:#007bff">Impostor Online</h1>
+        <input type="text" id="userName" placeholder="Twoje imię...">
+        <input type="text" id="gameIdInput" placeholder="Kod pokoju (np. 100)">
+        <button class="btn-blue" onclick="joinGame()">DOŁĄCZ DO GRY</button>
     </div>
 
     <div id="lobbyScreen" class="container hidden">
-        <h2>Pokój: <span id="displayGameId"></span></h2>
-        <div class="player-list" id="playerList"></div>
+        <h2>Pokój: <span id="displayGameId" style="color:#007bff"></span></h2>
+        <div class="player-list" id="playerList">Czekam na graczy...</div>
         <div id="adminControls" class="hidden">
-            <hr>
-            <button class="btn-success" onclick="startGame()">Rozpocznij Grę</button>
+            <button class="btn-green" onclick="startGame()">START (Tylko Host)</button>
         </div>
-        <p><small>Czekamy na hosta...</small></p>
+        <p id="waitingMsg" style="font-size: 0.9em; color: #666;">Czekamy, aż host rozpocznie...</p>
     </div>
 
     <div id="gameScreen" class="container hidden">
-        <h2 id="roleDisplay">Sprawdzanie roli...</h2>
-        <p id="questionDisplay"></p>
+        <h2 id="roleDisplay">Sprawdzam rolę...</h2>
+        <p id="questionDisplay" style="font-weight: bold; font-size: 1.1em;"></p>
         <input type="text" id="answerInput" placeholder="Twoja odpowiedź...">
-        <button class="btn-success" id="sendAnswerBtn" onclick="submitAnswer()">Wyślij Odpowiedź</button>
-        <div id="waitMessage" class="hidden">Czekaj na resztę graczy...</div>
+        <button class="btn-green" id="sendBtn" onclick="submitAnswer()">WYŚLIJ ODPOWIEDŹ</button>
+        <p id="sentStatus" class="hidden" style="color: #28a745;">Odpowiedź wysłana! Czekaj na innych...</p>
     </div>
 
     <div id="resultsScreen" class="container hidden">
-        <h2>Debata!</h2>
-        <div id="answersList" style="text-align:left;"></div>
-        <button class="btn-primary" onclick="location.reload()">Koniec / Nowa Gra</button>
+        <h2>Wyniki Debaty</h2>
+        <div id="answersList" style="text-align:left; max-height: 300px; overflow-y: auto;"></div>
+        <button class="btn-blue" onclick="location.reload()">ZAGRAJ PONOWNIE</button>
     </div>
 
     <script>
-        // --- KONFIGURACJA FIREBASE (Podmień na swoją!) ---
+        // Twoja konfiguracja Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAQLLZui2v4j3nLLKXhp2brcqsgSyy0W2s",
             authDomain: "menu-gier.firebaseapp.com",
             databaseURL: "https://menu-gier-default-rtdb.europe-west1.firebasedatabase.app",
             projectId: "menu-gier",
-            storageBucket: "menu-gier.firebasedatorage.app",
+            storageBucket: "menu-gier.firebasedatabase.app",
             messagingSenderId: "442961627931",
             appId: "1:442961627931:web:26453bd5720da6037d21be"
         };
 
+        // Inicjalizacja
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
@@ -71,134 +71,133 @@
         let currentGameId = "";
         let isAdmin = false;
 
-        const POOL_PYTANIA = [
-            { CREWMATE: "Ulubiony owoc?", IMPOSTOR: "Co najbardziej śmierdzi?" },
-            { CREWMATE: "Gdzie na wakacje?", IMPOSTOR: "Gdzie jest najzimniej?" }
+        const PYTANIA = [
+            { CREWMATE: "Ulubione danie?", IMPOSTOR: "Czego nienawidzisz jeść?" },
+            { CREWMATE: "Najlepsze miejsce na urlop?", IMPOSTOR: "Gdzie jest najniebezpieczniej?" },
+            { CREWMATE: "Twoje hobby?", IMPOSTOR: "Czego nigdy byś nie zrobił?" }
         ];
 
-        // --- FUNKCJE ---
+        // 1. DOŁĄCZANIE
+        window.joinGame = function() {
+            myName = document.getElementById('userName').value.trim();
+            currentGameId = document.getElementById('gameIdInput').value.trim();
 
-        function joinGame() {
-            myName = document.getElementById('userName').value;
-            currentGameId = document.getElementById('gameIdInput').value;
-            if (!myName || !currentGameId) return alert("Podaj imię i kod!");
+            if (!myName || !currentGameId) return alert("Wpisz imię i kod!");
 
             const gameRef = db.ref('games/' + currentGameId);
 
-            gameRef.once('value', snapshot => {
+            gameRef.once('value').then((snapshot) => {
                 if (!snapshot.exists()) {
                     isAdmin = true;
                     document.getElementById('adminControls').classList.remove('hidden');
+                    gameRef.set({ status: "LOBBY", admin: myName });
                 }
-                
-                // Dodaj mnie do listy graczy
+
                 db.ref(`games/${currentGameId}/players/${myName}`).set({
                     name: myName,
                     answer: "",
                     isImp: false
                 });
 
-                listenToGame();
+                startListening();
+                document.getElementById('startScreen').classList.add('hidden');
+                document.getElementById('lobbyScreen').classList.remove('hidden');
+                document.getElementById('displayGameId').innerText = currentGameId;
             });
+        };
 
-            document.getElementById('startScreen').classList.add('hidden');
-            document.getElementById('lobbyScreen').classList.remove('hidden');
-            document.getElementById('displayGameId').innerText = currentGameId;
-        }
-
-        function listenToGame() {
-            db.ref(`games/${currentGameId}`).on('value', snapshot => {
+        // 2. NASŁUCHIWANIE ZMIAN
+        function startListening() {
+            db.ref(`games/${currentGameId}`).on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (!data) return;
 
-                // Aktualizacja listy graczy w lobby
-                const pList = document.getElementById('playerList');
-                pList.innerHTML = "<b>Gracze:</b><br>";
-                Object.keys(data.players || {}).forEach(p => {
-                    pList.innerHTML += `- ${p} <br>`;
-                });
+                // Lista graczy
+                const listDiv = document.getElementById('playerList');
+                const players = data.players || {};
+                listDiv.innerHTML = "<b>Gracze w pokoju:</b><br>" + Object.keys(players).join(", ");
 
-                // Sprawdź czy gra ruszyła
-                if (data.status === "STARTED") {
-                    startLocalGame(data);
+                // Start gry
+                if (data.status === "INGAME" && document.getElementById('gameScreen').classList.contains('hidden')) {
+                    setupGameLayout(data);
                 }
 
-                // Sprawdź czy wszyscy odpowiedzieli
+                // Wyniki
                 if (data.status === "RESULTS") {
                     showResults(data);
                 }
             });
         }
 
-        function startGame() {
-            const playersRef = db.ref(`games/${currentGameId}/players`);
-            playersRef.once('value', snapshot => {
-                const players = snapshot.val();
+        // 3. START GRY (ADMIN)
+        window.startGame = function() {
+            db.ref(`games/${currentGameId}/players`).once('value', (snap) => {
+                const players = snap.val();
                 const names = Object.keys(players);
-                const impName = names[Math.floor(Math.random() * names.length)];
-                const questionSet = POOL_PYTANIA[Math.floor(Math.random() * POOL_PYTANIA.length)];
+                if (names.length < 2) return alert("Potrzeba min. 2 graczy!");
 
-                // Ustaw role i status w DB
+                const impName = names[Math.floor(Math.random() * names.length)];
+                const qSet = PYTANIA[Math.floor(Math.random() * PYTANIA.length)];
+
                 const updates = {};
                 names.forEach(n => {
                     updates[`players/${n}/isImp`] = (n === impName);
+                    updates[`players/${n}/answer`] = "";
                 });
-                updates['status'] = "STARTED";
-                updates['questionSet'] = questionSet;
+                updates['status'] = "INGAME";
+                updates['questionSet'] = qSet;
 
                 db.ref(`games/${currentGameId}`).update(updates);
             });
-        }
+        };
 
-        function startLocalGame(data) {
+        // 4. WIDOK GRY
+        function setupGameLayout(data) {
             document.getElementById('lobbyScreen').classList.add('hidden');
             document.getElementById('gameScreen').classList.remove('hidden');
-
+            
             const me = data.players[myName];
             const q = me.isImp ? data.questionSet.IMPOSTOR : data.questionSet.CREWMATE;
 
-            document.getElementById('roleDisplay').innerText = me.isImp ? "Jesteś IMPOSTOREM" : "Jesteś ZAŁOGANTEM";
-            document.getElementById('roleDisplay').style.color = me.isImp ? "red" : "green";
-            document.getElementById('questionDisplay').innerText = `Pytanie: ${q}`;
+            const roleEl = document.getElementById('roleDisplay');
+            roleEl.innerText = me.isImp ? "JESTEŚ IMPOSTOREM" : "JESTEŚ ZAŁOGANTEM";
+            roleEl.style.color = me.isImp ? "#dc3545" : "#28a745";
+            document.getElementById('questionDisplay').innerText = q;
         }
 
-        function submitAnswer() {
-            const ans = document.getElementById('answerInput').value;
-            if (!ans) return alert("Wpisz coś!");
+        // 5. WYSYŁANIE ODPOWIEDZI
+        window.submitAnswer = function() {
+            const ans = document.getElementById('answerInput').value.trim();
+            if (!ans) return alert("Wpisz odpowiedź!");
 
-            db.ref(`games/${currentGameId}/players/${myName}`).update({ answer: ans });
-            
-            document.getElementById('sendAnswerBtn').classList.add('hidden');
-            document.getElementById('waitMessage').classList.remove('hidden');
-
-            // Jeśli jestem adminem, sprawdź czy wszyscy odpowiedzieli
-            if (isAdmin) {
-                checkAllAnswered();
-            }
-        }
-
-        function checkAllAnswered() {
-            const gameRef = db.ref(`games/${currentGameId}`);
-            gameRef.once('value', snapshot => {
-                const data = snapshot.val();
-                const players = Object.values(data.players);
-                const allDone = players.every(p => p.answer !== "");
+            db.ref(`games/${currentGameId}/players/${myName}`).update({ answer: ans }).then(() => {
+                document.getElementById('answerInput').classList.add('hidden');
+                document.getElementById('sendBtn').classList.add('hidden');
+                document.getElementById('sentStatus').classList.remove('hidden');
                 
-                if (allDone) {
-                    gameRef.update({ status: "RESULTS" });
+                if (isAdmin) checkProgress();
+            });
+        };
+
+        function checkProgress() {
+            db.ref(`games/${currentGameId}/players`).once('value', (snap) => {
+                const players = Object.values(snap.val());
+                if (players.every(p => p.answer !== "")) {
+                    db.ref(`games/${currentGameId}`).update({ status: "RESULTS" });
                 }
             });
         }
 
+        // 6. WYNIKI
         function showResults(data) {
             document.getElementById('gameScreen').classList.add('hidden');
             document.getElementById('resultsScreen').classList.remove('hidden');
 
-            const list = document.getElementById('answersList');
-            list.innerHTML = `<h3>Pytanie załogi: ${data.questionSet.CREWMATE}</h3><hr>`;
+            const resDiv = document.getElementById('answersList');
+            resDiv.innerHTML = `<p style="background:#eef;padding:10px;border-radius:5px">Pytanie załogi: <b>${data.questionSet.CREWMATE}</b></p><hr>`;
             
             Object.values(data.players).forEach(p => {
-                list.innerHTML += `<p><b>${p.name}:</b> ${p.answer}</p>`;
+                resDiv.innerHTML += `<p><b>${p.name}:</b> ${p.answer} ${p.isImp ? '<span style="color:red">[IMP]</span>' : ''}</p>`;
             });
         }
     </script>
