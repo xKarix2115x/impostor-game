@@ -3,56 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impostor Firebase Fix</title>
+    <title>Impostor Game Online</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
     <style>
-        body { background-color: #1a1a1a; font-family: 'Segoe UI', sans-serif; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background: #fff; color: #333; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        body { background-color: #1a1a1a; font-family: sans-serif; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: #fff; color: #333; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; }
         .hidden { display: none !important; }
         input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
         button { width: 100%; padding: 14px; cursor: pointer; border: none; border-radius: 8px; font-weight: bold; margin-top: 10px; transition: 0.2s; }
         .btn-blue { background: #007bff; color: white; }
         .btn-green { background: #28a745; color: white; }
-        .player-list { text-align: left; background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #eee; }
+        #playerList { text-align: left; background: #f8f9fa; padding: 10px; border-radius: 8px; margin: 10px 0; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
 
-    <div id="startScreen" class="container">
+    <div id="screen-start" class="container">
         <h1 style="color:#007bff">Impostor Online</h1>
-        <input type="text" id="userName" placeholder="Twoje imię...">
-        <input type="text" id="gameIdInput" placeholder="Kod pokoju (np. 100)">
-        <button class="btn-blue" onclick="joinGame()">DOŁĄCZ DO GRY</button>
+        <input type="text" id="input-name" placeholder="Twoje imię">
+        <input type="text" id="input-room" placeholder="Kod pokoju">
+        <button class="btn-blue" onclick="joinGame()">DOŁĄCZ</button>
     </div>
 
-    <div id="lobbyScreen" class="container hidden">
-        <h2>Pokój: <span id="displayGameId" style="color:#007bff"></span></h2>
-        <div class="player-list" id="playerList">Czekam na graczy...</div>
-        <div id="adminControls" class="hidden">
-            <button class="btn-green" onclick="startGame()">START (Tylko Host)</button>
+    <div id="screen-lobby" class="container hidden">
+        <h2>Pokój: <span id="room-id-text"></span></h2>
+        <div id="playerList">Czekam na graczy...</div>
+        <div id="admin-area" class="hidden">
+            <button class="btn-green" onclick="startGame()">START GRY</button>
         </div>
-        <p id="waitingMsg" style="font-size: 0.9em; color: #666;">Czekamy, aż host rozpocznie...</p>
+        <p id="wait-msg"><small>Czekamy na start...</small></p>
     </div>
 
-    <div id="gameScreen" class="container hidden">
-        <h2 id="roleDisplay">Sprawdzam rolę...</h2>
-        <p id="questionDisplay" style="font-weight: bold; font-size: 1.1em;"></p>
-        <input type="text" id="answerInput" placeholder="Twoja odpowiedź...">
-        <button class="btn-green" id="sendBtn" onclick="submitAnswer()">WYŚLIJ ODPOWIEDŹ</button>
-        <p id="sentStatus" class="hidden" style="color: #28a745;">Odpowiedź wysłana! Czekaj na innych...</p>
+    <div id="screen-game" class="container hidden">
+        <h2 id="display-role">Twoja rola</h2>
+        <p id="display-question" style="font-size: 1.2em; font-weight: bold;"></p>
+        <input type="text" id="input-answer" placeholder="Twoja odpowiedź...">
+        <button class="btn-green" id="btn-send" onclick="sendAnswer()">WYŚLIJ</button>
+        <p id="msg-sent" class="hidden" style="color:green">Wysłano! Czekaj na innych.</p>
     </div>
 
-    <div id="resultsScreen" class="container hidden">
+    <div id="screen-results" class="container hidden">
         <h2>Wyniki Debaty</h2>
-        <div id="answersList" style="text-align:left; max-height: 300px; overflow-y: auto;"></div>
-        <button class="btn-blue" onclick="location.reload()">ZAGRAJ PONOWNIE</button>
+        <div id="results-area" style="text-align:left;"></div>
+        <button class="btn-blue" onclick="location.reload()">NOWA GRA</button>
     </div>
 
     <script>
-        // Twoja konfiguracja Firebase
+        // Konfiguracja Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAQLLZui2v4j3nLLKXhp2brcqsgSyy0W2s",
             authDomain: "menu-gier.firebaseapp.com",
@@ -63,142 +63,125 @@
             appId: "1:442961627931:web:26453bd5720da6037d21be"
         };
 
-        // Inicjalizacja
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         let myName = "";
-        let currentGameId = "";
-        let isAdmin = false;
+        let myRoom = "";
+        let isHost = false;
 
         const PYTANIA = [
-            { CREWMATE: "Ulubione danie?", IMPOSTOR: "Czego nienawidzisz jeść?" },
-            { CREWMATE: "Najlepsze miejsce na urlop?", IMPOSTOR: "Gdzie jest najniebezpieczniej?" },
-            { CREWMATE: "Twoje hobby?", IMPOSTOR: "Czego nigdy byś nie zrobił?" }
+            { CREW: "Ulubiony owoc?", IMP: "Co najbardziej śmierdzi?" },
+            { CREW: "Gdzie na wakacje?", IMP: "Gdzie jest najzimniej?" },
+            { CREW: "Ulubione zwierzę?", IMP: "Najgroźniejsze zwierzę?" }
         ];
 
-        // 1. DOŁĄCZANIE
+        // FUNKCJA: DOŁĄCZANIE
         window.joinGame = function() {
-            myName = document.getElementById('userName').value.trim();
-            currentGameId = document.getElementById('gameIdInput').value.trim();
+            myName = document.getElementById('input-name').value.trim();
+            myRoom = document.getElementById('input-room').value.trim();
 
-            if (!myName || !currentGameId) return alert("Wpisz imię i kod!");
+            if (!myName || !myRoom) return alert("Uzupełnij dane!");
 
-            const gameRef = db.ref('games/' + currentGameId);
-
-            gameRef.once('value').then((snapshot) => {
-                if (!snapshot.exists()) {
-                    isAdmin = true;
-                    document.getElementById('adminControls').classList.remove('hidden');
-                    gameRef.set({ status: "LOBBY", admin: myName });
+            const roomRef = db.ref('games/' + myRoom);
+            roomRef.once('value').then(snap => {
+                if (!snap.exists()) {
+                    isHost = true;
+                    document.getElementById('admin-area').classList.remove('hidden');
+                    roomRef.set({ status: "LOBBY", host: myName });
                 }
-
-                db.ref(`games/${currentGameId}/players/${myName}`).set({
+                
+                db.ref(`games/${myRoom}/players/${myName}`).set({
                     name: myName,
                     answer: "",
                     isImp: false
                 });
 
-                startListening();
-                document.getElementById('startScreen').classList.add('hidden');
-                document.getElementById('lobbyScreen').classList.remove('hidden');
-                document.getElementById('displayGameId').innerText = currentGameId;
+                listenToRoom();
+                showScreen('screen-lobby');
+                document.getElementById('room-id-text').innerText = myRoom;
             });
         };
 
-        // 2. NASŁUCHIWANIE ZMIAN
-        function startListening() {
-            db.ref(`games/${currentGameId}`).on('value', (snapshot) => {
-                const data = snapshot.val();
+        // FUNKCJA: NASŁUCHIWANIE
+        function listenToRoom() {
+            db.ref(`games/${myRoom}`).on('value', snap => {
+                const data = snap.val();
                 if (!data) return;
 
                 // Lista graczy
-                const listDiv = document.getElementById('playerList');
                 const players = data.players || {};
-                listDiv.innerHTML = "<b>Gracze w pokoju:</b><br>" + Object.keys(players).join(", ");
+                document.getElementById('playerList').innerHTML = "<b>Gracze:</b><br>" + Object.keys(players).join(", ");
 
                 // Start gry
-                if (data.status === "INGAME" && document.getElementById('gameScreen').classList.contains('hidden')) {
-                    setupGameLayout(data);
+                if (data.status === "INGAME" && document.getElementById('screen-game').classList.contains('hidden')) {
+                    const me = players[myName];
+                    const q = me.isImp ? data.qSet.IMP : data.qSet.CREW;
+                    
+                    showScreen('screen-game');
+                    document.getElementById('display-role').innerText = me.isImp ? "JESTEŚ IMPOSTOREM" : "JESTEŚ ZAŁOGANTEM";
+                    document.getElementById('display-role').style.color = me.isImp ? "red" : "green";
+                    document.getElementById('display-question').innerText = q;
                 }
 
                 // Wyniki
                 if (data.status === "RESULTS") {
-                    showResults(data);
+                    showFinalResults(data);
                 }
             });
         }
 
-        // 3. START GRY (ADMIN)
+        // FUNKCJA: START (HOST)
         window.startGame = function() {
-            db.ref(`games/${currentGameId}/players`).once('value', (snap) => {
-                const players = snap.val();
-                const names = Object.keys(players);
-                if (names.length < 2) return alert("Potrzeba min. 2 graczy!");
-
-                const impName = names[Math.floor(Math.random() * names.length)];
-                const qSet = PYTANIA[Math.floor(Math.random() * PYTANIA.length)];
+            db.ref(`games/${myRoom}/players`).once('value', snap => {
+                const p = snap.val();
+                const names = Object.keys(p);
+                const randomImp = names[Math.floor(Math.random() * names.length)];
+                const randomQ = PYTANIA[Math.floor(Math.random() * PYTANIA.length)];
 
                 const updates = {};
-                names.forEach(n => {
-                    updates[`players/${n}/isImp`] = (n === impName);
-                    updates[`players/${n}/answer`] = "";
-                });
+                names.forEach(n => updates[`players/${n}/isImp`] = (n === randomImp));
                 updates['status'] = "INGAME";
-                updates['questionSet'] = qSet;
+                updates['qSet'] = randomQ;
 
-                db.ref(`games/${currentGameId}`).update(updates);
+                db.ref(`games/${myRoom}`).update(updates);
             });
         };
 
-        // 4. WIDOK GRY
-        function setupGameLayout(data) {
-            document.getElementById('lobbyScreen').classList.add('hidden');
-            document.getElementById('gameScreen').classList.remove('hidden');
-            
-            const me = data.players[myName];
-            const q = me.isImp ? data.questionSet.IMPOSTOR : data.questionSet.CREWMATE;
+        // FUNKCJA: WYŚLIJ ODPOWIEDŹ
+        window.sendAnswer = function() {
+            const ans = document.getElementById('input-answer').value;
+            if (!ans) return alert("Wpisz coś!");
 
-            const roleEl = document.getElementById('roleDisplay');
-            roleEl.innerText = me.isImp ? "JESTEŚ IMPOSTOREM" : "JESTEŚ ZAŁOGANTEM";
-            roleEl.style.color = me.isImp ? "#dc3545" : "#28a745";
-            document.getElementById('questionDisplay').innerText = q;
-        }
-
-        // 5. WYSYŁANIE ODPOWIEDZI
-        window.submitAnswer = function() {
-            const ans = document.getElementById('answerInput').value.trim();
-            if (!ans) return alert("Wpisz odpowiedź!");
-
-            db.ref(`games/${currentGameId}/players/${myName}`).update({ answer: ans }).then(() => {
-                document.getElementById('answerInput').classList.add('hidden');
-                document.getElementById('sendBtn').classList.add('hidden');
-                document.getElementById('sentStatus').classList.remove('hidden');
-                
-                if (isAdmin) checkProgress();
+            db.ref(`games/${myRoom}/players/${myName}`).update({ answer: ans }).then(() => {
+                document.getElementById('btn-send').classList.add('hidden');
+                document.getElementById('input-answer').classList.add('hidden');
+                document.getElementById('msg-sent').classList.remove('hidden');
+                if (isHost) checkAllAnswers();
             });
         };
 
-        function checkProgress() {
-            db.ref(`games/${currentGameId}/players`).once('value', (snap) => {
+        function checkAllAnswers() {
+            db.ref(`games/${myRoom}/players`).once('value', snap => {
                 const players = Object.values(snap.val());
                 if (players.every(p => p.answer !== "")) {
-                    db.ref(`games/${currentGameId}`).update({ status: "RESULTS" });
+                    db.ref(`games/${myRoom}`).update({ status: "RESULTS" });
                 }
             });
         }
 
-        // 6. WYNIKI
-        function showResults(data) {
-            document.getElementById('gameScreen').classList.add('hidden');
-            document.getElementById('resultsScreen').classList.remove('hidden');
-
-            const resDiv = document.getElementById('answersList');
-            resDiv.innerHTML = `<p style="background:#eef;padding:10px;border-radius:5px">Pytanie załogi: <b>${data.questionSet.CREWMATE}</b></p><hr>`;
-            
+        function showFinalResults(data) {
+            showScreen('screen-results');
+            const area = document.getElementById('results-area');
+            area.innerHTML = `<h3>Pytanie załogi: ${data.qSet.CREW}</h3><hr>`;
             Object.values(data.players).forEach(p => {
-                resDiv.innerHTML += `<p><b>${p.name}:</b> ${p.answer} ${p.isImp ? '<span style="color:red">[IMP]</span>' : ''}</p>`;
+                area.innerHTML += `<p><b>${p.name}:</b> ${p.answer} ${p.isImp ? '<b style="color:red">[IMP]</b>' : ''}</p>`;
             });
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.container').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
         }
     </script>
 </body>
