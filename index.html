@@ -41,6 +41,7 @@
         .btn-create { background: #28a745; color: white; }
         .btn-join { background: #007bff; color: white; }
         .btn-start { background: #ffc107; color: black; }
+        .btn-exit { background: #6c757d; color: white; }
         input, select { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; }
         #playerList { text-align: left; background: #f9f9f9; padding: 15px; border-radius: 10px; margin: 15px 0; border: 1px solid #ddd; }
     </style>
@@ -67,6 +68,7 @@
             <button class="btn-start" onclick="startGame()">ROZPOCZNIJ MECZ</button>
         </div>
         <p id="guest-msg">Oczekiwanie na Hosta...</p>
+        <button class="btn-exit" onclick="exitGame()">WYJDŹ</button>
     </div>
 
     <div id="screen-karty" class="container hidden">
@@ -75,7 +77,7 @@
             <div class="card-front">KLIKNIJ ABY ODKRYĆ</div>
             <div id="card-back-content" class="card-back"></div>
         </div>
-        <button class="btn-join" onclick="location.reload()">OPUŚĆ GRĘ</button>
+        <button class="btn-exit" onclick="exitGame()">OPUŚĆ I ZRESETUJ</button>
     </div>
 
     <div id="screen-pytania" class="container hidden">
@@ -89,7 +91,7 @@
     <div id="screen-results" class="container hidden">
         <h2>Wyniki i Debata</h2>
         <div id="results-area" style="text-align:left; max-height: 300px; overflow-y: auto;"></div>
-        <button class="btn-join" onclick="location.reload()">NOWA GRA</button>
+        <button class="btn-join" onclick="exitGame()">ZAGRAJ PONOWNIE (RESET)</button>
     </div>
 
     <script>
@@ -121,14 +123,21 @@
             myName = document.getElementById('input-name').value.trim();
             myRoom = document.getElementById('input-room').value.trim();
             if(!myName || !myRoom) return alert("Uzupełnij dane!");
+
             const ref = db.ref('games/' + myRoom);
             ref.once('value').then(snap => {
                 if(mode === 'create') {
                     if(snap.exists()) return alert("Pokój już istnieje!");
                     isHost = true;
+                    // Czyścimy pokój przy rozłączeniu Hosta
+                    ref.onDisconnect().remove();
                     ref.set({ host: myName, status: "LOBBY" });
                 }
+                
                 db.ref(`games/${myRoom}/players/${myName}`).set({ name: myName, ans: "" });
+                // Czyścimy gracza przy rozłączeniu
+                db.ref(`games/${myRoom}/players/${myName}`).onDisconnect().remove();
+
                 if(isHost) document.getElementById('host-panel').classList.remove('hidden');
                 document.getElementById('room-id-display').innerText = myRoom;
                 showScreen('screen-lobby');
@@ -139,9 +148,16 @@
         function startSync() {
             db.ref(`games/${myRoom}`).on('value', snap => {
                 const data = snap.val();
-                if(!data) return;
+                if(!data) {
+                    if (myName) {
+                        alert("Pokój został zamknięty.");
+                        location.reload();
+                    }
+                    return;
+                }
                 const players = data.players || {};
                 document.getElementById('playerList').innerHTML = "<b>Gracze:</b> " + Object.keys(players).join(", ");
+                
                 if(data.status === "STARTED") {
                     const me = players[myName];
                     if(data.mode === "KARTY") {
@@ -149,7 +165,6 @@
                         const cardBack = document.getElementById('card-back-content');
                         if(me.isImp) {
                             const hints = data.set.hint.split(', ');
-                            // Używamy imienia jako ziarna losowania, by zawsze widzieć tę samą jedną podpowiedź
                             const index = myName.length % hints.length;
                             cardBack.innerText = "IMPOSTOR\n\nPodpowiedź:\n" + hints[index];
                             cardBack.className = "card-back impostor-bg";
@@ -171,12 +186,19 @@
         function startGame() {
             const mode = document.getElementById('select-mode').value;
             db.ref(`games/${myRoom}/players`).once('value', snap => {
-                const names = Object.keys(snap.val());
+                const playersObj = snap.val();
+                if(!playersObj) return;
+                const names = Object.keys(playersObj);
                 if(names.length < 2) return alert("Min. 2 graczy!");
+                
                 const imp = names[Math.floor(Math.random() * names.length)];
                 const set = mode === "KARTY" ? POOL_KARTY[Math.floor(Math.random() * POOL_KARTY.length)] : POOL_PYTANIA[Math.floor(Math.random() * POOL_PYTANIA.length)];
+                
                 const updates = {};
-                names.forEach(n => updates[`players/${n}/isImp`] = (n === imp));
+                names.forEach(n => {
+                    updates[`players/${n}/isImp`] = (n === imp);
+                    updates[`players/${n}/ans`] = ""; // Reset odpowiedzi na nową turę
+                });
                 updates['status'] = "STARTED";
                 updates['mode'] = mode;
                 updates['set'] = set;
@@ -190,15 +212,29 @@
             db.ref(`games/${myRoom}/players/${myName}`).update({ ans: val }).then(() => {
                 document.getElementById('btn-send-ans').classList.add('hidden');
                 document.getElementById('sent-msg').classList.remove('hidden');
-                if(isHost) checkFinish();
+                checkFinish();
             });
         }
 
         function checkFinish() {
-            db.ref(`games/${myRoom}/players`).once('value', snap => {
-                const p = Object.values(snap.val());
-                if(p.every(x => x.ans !== "")) db.ref(`games/${myRoom}`).update({ status: "RESULTS" });
+            db.ref(`games/${myRoom}`).once('value', snap => {
+                const data = snap.val();
+                const p = Object.values(data.players);
+                if(p.every(x => x.ans !== "")) {
+                    db.ref(`games/${myRoom}`).update({ status: "RESULTS" });
+                }
             });
+        }
+
+        function exitGame() {
+            if(isHost) {
+                // Host usuwa cały pokój przed wyjściem
+                db.ref(`games/${myRoom}`).remove().then(() => {
+                    location.reload();
+                });
+            } else {
+                location.reload();
+            }
         }
 
         function showFinalResults(data) {
