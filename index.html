@@ -1,18 +1,16 @@
-﻿<!DOCTYPE html
+<!DOCTYPE html>
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inne Pytanie - Multi-Phone</title>
-
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-
+    <title>Multi-Impostor Game</title>
     <style>
+        /* WSPÓLNA STYLIZACJA */
         body {
             background-image: url("tło.jpg");
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
             background-attachment: fixed;
             background-color: #1a1a1a;
             font-family: Arial, sans-serif;
@@ -25,148 +23,215 @@
         }
 
         .container {
-            background-color: rgba(255, 255, 255, 0.95);
+            background-color: #fff;
             padding: 30px;
-            border-radius: 15px;
+            border-radius: 12px;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
             text-align: center;
             width: 90%;
-            max-width: 400px;
+            max-width: 450px;
+            transition: all 0.3s ease;
         }
 
-        .screen {
-            display: none;
-        }
+        .hidden { display: none !important; }
 
-        .active {
+        /* MENU WYBORU TRYBU */
+        .mode-selection h1 { color: #007bff; margin-bottom: 30px; }
+        .btn-mode {
             display: block;
-        }
-
-        h1 {
-            color: #007bff;
-            margin-bottom: 20px;
-        }
-
-        h2 {
-            color: #555;
-        }
-
-        input {
             width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: white;
             border: none;
             border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: bold;
             cursor: pointer;
-            transition: 0.2s;
-            color: white;
+            transition: transform 0.2s;
         }
+        .btn-haslo { background-color: #28a745; }
+        .btn-pytanie { background-color: #007bff; }
+        .btn-mode:hover { transform: translateY(-3px); filter: brightness(1.1); }
 
-        .btn-primary {
-            background-color: #007bff;
+        /* STYLE DLA TRYBU PYTAŃ (TWÓJ DRUGI KOD) */
+        .settings-group, .name-fields-area {
+            text-align: left; margin-top: 15px; padding: 15px;
+            border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;
         }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        input[type="number"], input[type="text"] {
+            padding: 8px; border: 1px solid #ccc; border-radius: 5px; text-align: center;
+        }
+        #answerInput { width: 100%; box-sizing: border-box; padding: 12px; margin: 10px 0; font-size: 1.1em; }
+        
+        /* STYLE DLA TRYBU KART (TWÓJ PIERWSZY KOD) */
+        #gameCardsGrid { 
+            display: none; flex-wrap: wrap; justify-content: center; gap: 15px; 
+            max-width: 800px; padding: 20px; background: rgba(0,0,0,0.8); border-radius: 15px;
+        }
+        .player-card {
+            position: relative; width: 110px; height: 140px;
+            transform-style: preserve-3d; transition: transform 0.6s; cursor: pointer;
+        }
+        .player-card.flipped { transform: rotateY(180deg); }
+        .card-front, .card-back {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; border: 2px solid #333; padding: 5px; box-sizing: border-box;
+        }
+        .card-front { background-color: #007bff; color: white; }
+        .card-back { transform: rotateY(180deg); color: white; }
+        .card-back.impostor { background-color: #dc3545; }
+        .card-back.crewmate { background-color: #28a745; }
 
-        .btn-success {
-            background-color: #28a745;
+        /* PRZYCISKI AKCJI */
+        .btn-action {
+            width: 100%; padding: 12px; margin-top: 15px;
+            border: none; border-radius: 5px; font-size: 1.1em; font-weight: bold;
+            cursor: pointer; color: white; background-color: #28a745;
         }
+        .btn-reset { background-color: #6c757d; margin-top: 10px; }
 
-        .btn-danger {
-            background-color: #dc3545;
-        }
-
-        .room-code-display {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #007bff;
-            letter-spacing: 5px;
-            margin: 20px 0;
-        }
-
-        ul {
-            list-style: none;
-            padding: 0;
-            text-align: left;
-        }
-
-        li {
-            background: #f8f9fa;
-            margin: 5px 0;
-            padding: 10px;
-            border-radius: 5px;
-            border-left: 5px solid #007bff;
-        }
-
-        #question-box {
-            background: #e6f0ff;
-            padding: 20px;
-            border: 2px dashed #007bff;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
+        #resultsList { list-style: none; padding: 0; text-align: left; }
+        #resultsList li { border-bottom: 1px dashed #ccc; padding: 8px 0; }
+        .impostor-text { color: #dc3545; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div id="start-screen" class="screen active">
-            <h1>Inne Pytanie</h1>
-            <input type="text" id="player-name" placeholder="Twoje imię">
-            <button class="btn-primary" onclick="createRoom()">Stwórz Pokój (Host)</button>
-            <div style="margin: 20px 0; color: #888;">— LUB —</div>
-            <input type="text" id="join-code" placeholder="Kod pokoju (4 znaki)">
-            <button class="btn-success" onclick="joinRoom()">Dołącz do gry</button>
-        </div>
+    <div class="container" id="mainMenu">
+        <h1>Wybierz Tryb Gry</h1>
+        <button class="btn-mode btn-haslo" onclick="initMode('KARTY')">Tryb: KARTY<br><small>(Wspólne hasło, klikanie kart)</small></button>
+        <button class="btn-mode btn-pytanie" onclick="initMode('PYTANIA')">Tryb: PYTANIA<br><small>(Inne pytanie dla Impostora)</small></button>
+    </div>
 
-        <div id="lobby-screen" class="screen">
-            <h2>Kod pokoju:</h2>
-            <div class="room-code-display" id="display-code">----</div>
-            <h3>Gracze w lobby:</h3>
-            <ul id="player-list"></ul>
-            <div id="host-controls" style="display:none;">
-                <button class="btn-success" onclick="hostStartGame()">ROZPOCZNIJ GRĘ</button>
+    <div class="container hidden" id="setupScreen">
+        <h2 id="modeTitle">Ustawienia</h2>
+        <div class="settings-group">
+            <div class="setting-item">
+                <label>Liczba graczy:</label>
+                <input type="number" id="numPlayers" value="4" min="3">
             </div>
-            <p id="wait-msg">Czekamy na start gry przez Hosta...</p>
-        </div>
-
-        <div id="game-screen" class="screen">
-            <h2 id="role-text">Twoja Rola</h2>
-            <div id="question-box">
-                <p style="font-size: 0.9em; color: #666;">Twoje pytanie:</p>
-                <p id="player-question" style="font-size: 1.2em; font-weight: bold;"></p>
+            <div class="setting-item">
+                <label>Liczba Impostorów:</label>
+                <input type="number" id="numImpostors" value="1" min="1">
             </div>
-            <input type="text" id="answer-input" placeholder="Wpisz swoją odpowiedź...">
-            <button class="btn-primary" onclick="submitAnswer()">Wyślij Odpowiedź</button>
-        </div>
-
-        <div id="waiting-others-screen" class="screen">
-            <h2>Zapisano!</h2>
-            <p>Czekamy, aż wszyscy gracze wyślą swoje odpowiedzi...</p>
-        </div>
-
-        <div id="results-screen" class="screen">
-            <h2>Wyniki</h2>
-            <p id="revealed-q-crew" style="font-style: italic; color: #555;"></p>
-            <ul id="answers-list"></ul>
-            <div id="host-reveal-btn" style="display:none;">
-                <button class="btn-danger" onclick="revealImpostor()">UJAWNIJ IMPOSTORA</button>
+            <div id="cardHintOption" class="setting-item">
+                <label>Podpowiedź dla Impostora?</label>
+                <input type="checkbox" id="cardHintToggle">
             </div>
-            <button class="btn-primary" style="margin-top:20px;" onclick="location.reload()">Zagraj Ponownie</button>
         </div>
+        <button class="btn-action" onclick="goToNames()">Dalej</button>
+        <button class="btn-action btn-reset" onclick="location.reload()">Powrót</button>
+    </div>
+
+    <div class="container hidden" id="namesScreen">
+        <h2>Imiona Graczy</h2>
+        <div id="nameInputsArea" class="name-fields-area"></div>
+        <button class="btn-action" onclick="processGameStart()">Rozpocznij</button>
+    </div>
+
+    <div class="container hidden" id="questionTurnScreen">
+        <h2 id="currentTurnName">Gracz</h2>
+        <div id="roleBox" style="padding: 15px; border: 2px dashed #007bff; background: #e6f0ff; margin-bottom: 15px; border-radius: 8px;">
+            </div>
+        <input type="text" id="answerInput" placeholder="Twoja odpowiedź...">
+        <button class="btn-action" onclick="saveQuestionAnswer()">Potwierdź</button>
+    </div>
+
+    <div class="container hidden" id="passScreen">
+        <h2>Zapisano!</h2>
+        <p>Przekaż urządzenie do:</p>
+        <h1 id="nextPlayerName" style="color: #007bff;">Imię</h1>
+        <button class="btn-action" onclick="nextQuestionTurn()">Kontynuuj</button>
+    </div>
+
+    <div class="container hidden" id="resultsScreen">
+        <h2>Wyniki - Dyskusja</h2>
+        <p id="revealedQuestion" style="font-style: italic; font-weight: bold;"></p>
+        <ul id="resultsList"></ul>
+        <button class="btn-action" style="background:#dc3545" onclick="finalRevealPytań()">Ujawnij Impostora</button>
+    </div>
+
+    <div id="gameCardsGrid">
+        </div>
+
+    <div class="container hidden" id="finalRevealScreen">
+        <h2 style="color:#dc3545">Ujawnienie</h2>
+        <div id="finalDetails"></div>
+        <button class="btn-action" onclick="location.reload()">Zagraj Ponownie</button>
     </div>
 
     <script>
+        // --- LOGIKA BAZY DANYCH ---
+        let currentMode = ''; // 'KARTY' lub 'PYTANIA'
+        let players = [];
+        let currentPlayerIndex = 0;
+        let selectedSet = null;
+
+        const POOL_KARTY = [
+            { word: "Pizza", hint: "Jedzenie, Włochy", cat: "Jedzenie" },
+            { word: "Paryż", hint: "Miasto, Wieża", cat: "Geografia" },
+            { word: "Batman", hint: "Bohater, Nietoperz", cat: "Film" }
+        ];
+
+        const POOL_PYTANIA = [
+            { name: "Jedzenie", CREWMATE: "Jaką potrawę najchętniej zamawiasz?", IMPOSTOR: "Co potrafisz ugotować najlepiej?" },
+            { name: "Podróże", CREWMATE: "Gdzie chcesz pojechać na wakacje?", IMPOSTOR: "Gdzie ostatnio byłeś?" },
+            { name: "Zwierzęta", CREWMATE: "Ulubione zwierzę domowe?", IMPOSTOR: "Najgroźniejsze zwierzę świata?" }
+        ];
+
+        // --- NAWIGACJA ---
+        function initMode(mode) {
+            currentMode = mode;
+            document.getElementById('mainMenu').classList.add('hidden');
+            document.getElementById('setupScreen').classList.remove('hidden');
+            document.getElementById('modeTitle').innerText = mode === 'KARTY' ? "Tryb: Karty" : "Tryb: Pytania";
+            document.getElementById('cardHintOption').className = mode === 'KARTY' ? 'setting-item' : 'hidden';
+        }
+
+        function goToNames() {
+            const n = parseInt(document.getElementById('numPlayers').value);
+            const area = document.getElementById('nameInputsArea');
+            area.innerHTML = '';
+            for(let i=0; i<n; i++) {
+                area.innerHTML += `<div class="setting-item"><label>Gracz ${i+1}:</label><input type="text" class="player-name-in" placeholder="Imię..."></div>`;
+            }
+            document.getElementById('setupScreen').classList.add('hidden');
+            document.getElementById('namesScreen').classList.remove('hidden');
+        }
+
+        // --- START GRY ---
+        function processGameStart() {
+            const nameInputs = document.querySelectorAll('.player-name-in');
+            const nImp = parseInt(document.getElementById('numImpostors').value);
+            players = [];
+
+            // 1. Zbierz imiona
+            nameInputs.forEach(input => {
+                players.push({ name: input.value || "Anonim", isImp: false, answer: '', question: '' });
+            });
+
+            // 2. Losuj role
+            let indices = Array.from(Array(players.length).keys());
+            for(let i=0; i<nImp; i++) {
+                let randomIdx = Math.floor(Math.random() * indices.length);
+                players[indices[randomIdx]].isImp = true;
+                indices.splice(randomIdx, 1);
+            }
+
+            document.getElementById('namesScreen').classList.add('hidden');
+
+            if(currentMode === 'KARTY') {
+                startKartyMode();
+            } else {
+                startPytaniaMode();
+            }
+        }
+
+        <script>
         // --- TWOJA KONFIGURACJA FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyAQLLZui2v4j3nLLKXhp2brcqsgSyy0W2s",
@@ -178,145 +243,99 @@
             appId: "1:442961627931:web:26453bd5720da6037d21be"
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        // --- TRYB 1: KARTY ---
+        function startKartyMode() {
+            selectedSet = POOL_KARTY[Math.floor(Math.random() * POOL_KARTY.length)];
+            const grid = document.getElementById('gameCardsGrid');
+            const showHint = document.getElementById('cardHintToggle').checked;
+            grid.innerHTML = '<button onclick="location.reload()" style="position:fixed; top:10px; right:10px; padding:10px; background:#f44336; color:white; border:none; border-radius:5px; cursor:pointer">X</button>';
 
-        let currentRoom = null;
-        let myName = "";
-        let isHost = false;
+            players.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'player-card';
+                let content = p.isImp ? (showHint ? `Impostor (Podp: ${selectedSet.hint})` : "Impostor (???)") : `Hasło: ${selectedSet.word}`;
+                
+                card.innerHTML = `
+                    <div class="card-front">${p.name}</div>
+                    <div class="card-back ${p.isImp ? 'impostor' : 'crewmate'}">${content}</div>
+                `;
 
-        const QUESTION_POOLS = [
-            { crew: "Jaką potrawę byś najchętniej zamówił?", imp: "Jaką potrawę byś ugotował na imprezę?" },
-            { crew: "Jaki kraj chciałbyś odwiedzić?", imp: "W jakim kraju mieszkało by ci się najlepiej?" },
-            { crew: "Jakie jest Twoje ulubione zwierzę?", imp: "Jakiego zwierzęcia byś nie chciał mieć?" },
-            { crew: "Jaki jest twój ulubiony kolor?", imp: "Jakiego koloru masz na sobie bluzkę?" }
-        ];
-
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        function createRoom() {
-            myName = document.getElementById('player-name').value;
-            if (!myName) return alert("Wpisz swoje imię!");
-
-            const code = Math.random().toString(36).substring(2, 6).toUpperCase();
-            isHost = true;
-            currentRoom = code;
-
-            db.ref('rooms/' + code).set({
-                status: 'lobby',
-                hostName: myName,
-                players: { "p1": myName }
+                card.onclick = function() {
+                    if(!this.classList.contains('flipped')) this.classList.add('flipped');
+                    else { this.style.opacity = "0.3"; this.style.pointerEvents = "none"; }
+                };
+                grid.appendChild(card);
             });
-
-            startListening(code);
-            showScreen('lobby-screen');
+            grid.style.display = 'flex';
         }
 
-        function joinRoom() {
-            const code = document.getElementById('join-code').value.toUpperCase();
-            myName = document.getElementById('player-name').value;
-            if (!code || !myName) return alert("Wpisz imię i kod!");
-
-            currentRoom = code;
-            db.ref('rooms/' + code + '/players').push(myName);
-
-            startListening(code);
-            showScreen('lobby-screen');
-        }
-
-        function startListening(code) {
-            document.getElementById('display-code').innerText = code;
-
-            db.ref('rooms/' + code).on('value', (snap) => {
-                const data = snap.val();
-                if (!data) return;
-
-                // Aktualizacja listy graczy
-                const list = document.getElementById('player-list');
-                list.innerHTML = "";
-                const playersArray = Object.values(data.players || {});
-                playersArray.forEach(name => {
-                    list.innerHTML += `<li>${name}</li>`;
-                });
-
-                // Sterowanie Hostem
-                if (isHost) document.getElementById('host-controls').style.display = 'block';
-
-                // Przejście do gry
-                if (data.status === 'playing') {
-                    setupGame(data);
-                }
-
-                // Przejście do wyników
-                if (data.status === 'results') {
-                    displayResults(data);
-                }
+        // --- TRYB 2: PYTANIA ---
+        function startPytaniaMode() {
+            selectedSet = POOL_PYTANIA[Math.floor(Math.random() * POOL_PYTANIA.length)];
+            players.forEach(p => {
+                p.question = p.isImp ? selectedSet.IMPOSTOR : selectedSet.CREWMATE;
             });
+            currentPlayerIndex = 0;
+            showQuestionTurn();
         }
 
-        function hostStartGame() {
-            db.ref('rooms/' + currentRoom + '/players').get().then(snap => {
-                const players = Object.values(snap.val());
-                const impName = players[Math.floor(Math.random() * players.length)];
-                const q = QUESTION_POOLS[Math.floor(Math.random() * QUESTION_POOLS.length)];
-
-                db.ref('rooms/' + currentRoom).update({
-                    status: 'playing',
-                    impostor: impName,
-                    qCrew: q.crew,
-                    qImp: q.imp
-                });
-            });
+        function showQuestionTurn() {
+            const p = players[currentPlayerIndex];
+            document.getElementById('currentTurnName').innerText = p.name;
+            document.getElementById('roleBox').innerHTML = `
+                <p>Twoja rola: <b style="color:${p.isImp?'#dc3545':'#28a745'}">${p.isImp?'IMPOSTOR':'ZAŁOGANT'}</b></p>
+                <p>Pytanie: <b>"${p.question}"</b></p>
+            `;
+            document.getElementById('answerInput').value = '';
+            document.getElementById('questionTurnScreen').classList.remove('hidden');
         }
 
-        function setupGame(data) {
-            showScreen('game-screen');
-            const isImp = (myName === data.impostor);
-            document.getElementById('role-text').innerText = isImp ? "Jesteś IMPOSTOREM" : "Jesteś ZAŁOGANTEM";
-            document.getElementById('role-text').style.color = isImp ? "#dc3545" : "#28a745";
-            document.getElementById('player-question').innerText = isImp ? data.qImp : data.qCrew;
-        }
+        function saveQuestionAnswer() {
+            const val = document.getElementById('answerInput').value;
+            if(!val) return alert("Wpisz cokolwiek!");
+            players[currentPlayerIndex].answer = val;
 
-        function submitAnswer() {
-            const ans = document.getElementById('answer-input').value;
-            if (!ans) return alert("Wpisz odpowiedź!");
-
-            db.ref('rooms/' + currentRoom + '/answers').push({
-                name: myName,
-                text: ans
-            });
-
-            showScreen('waiting-others-screen');
-
-            if (isHost) {
-                // Host może zakończyć zbieranie odpowiedzi
-                setTimeout(() => {
-                    db.ref('rooms/' + currentRoom).update({ status: 'results' });
-                }, 2000);
+            document.getElementById('questionTurnScreen').classList.add('hidden');
+            
+            if(currentPlayerIndex < players.length - 1) {
+                document.getElementById('nextPlayerName').innerText = players[currentPlayerIndex+1].name;
+                document.getElementById('passScreen').classList.remove('hidden');
+            } else {
+                showPytaniaResults();
             }
         }
 
-        function displayResults(data) {
-            showScreen('results-screen');
-            document.getElementById('revealed-q-crew').innerText = "Pytanie Załogantów: " + data.qCrew;
-
-            const list = document.getElementById('answers-list');
-            list.innerHTML = "";
-            Object.values(data.answers || {}).forEach(ans => {
-                list.innerHTML += `<li><b>${ans.name}:</b> ${ans.text}</li>`;
-            });
-
-            if (isHost) document.getElementById('host-reveal-btn').style.display = 'block';
+        function nextQuestionTurn() {
+            currentPlayerIndex++;
+            document.getElementById('passScreen').classList.add('hidden');
+            showQuestionTurn();
         }
 
-        function revealImpostor() {
-            db.ref('rooms/' + currentRoom + '/impostor').get().then(snap => {
-                alert("IMPOSTOREM JEST: " + snap.val());
+        function showPytaniaResults() {
+            document.getElementById('revealedQuestion').innerText = `Pytanie Załogantów: "${selectedSet.CREWMATE}"`;
+            const list = document.getElementById('resultsList');
+            list.innerHTML = '';
+            
+            // Mieszamy kolejność wyświetlania, żeby nie było po kolei
+            let shuffled = [...players].sort(() => Math.random() - 0.5);
+            shuffled.forEach(p => {
+                list.innerHTML += `<li><b>${p.name}</b>: ${p.answer}</li>`;
             });
-       }
+            document.getElementById('resultsScreen').classList.remove('hidden');
+        }
+
+        function finalRevealPytań() {
+            document.getElementById('resultsScreen').classList.add('hidden');
+            const det = document.getElementById('finalDetails');
+            det.innerHTML = '';
+            players.forEach(p => {
+                det.innerHTML += `<p class="${p.isImp?'impostor-text':''}">
+                    ${p.name} (${p.isImp?'IMPOSTOR':'ZAŁOGANT'})<br>
+                    Odp: ${p.answer} | Pytanie: ${p.question}
+                </p><hr>`;
+            });
+            document.getElementById('finalRevealScreen').classList.remove('hidden');
+        }
     </script>
 </body>
 </html>
