@@ -1,0 +1,322 @@
+﻿<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inne Pytanie - Multi-Phone</title>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+    <style>
+        body {
+            background-image: url("tło.jpg");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: #1a1a1a;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+
+        h1 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            color: white;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+        }
+
+        .room-code-display {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #007bff;
+            letter-spacing: 5px;
+            margin: 20px 0;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+
+        li {
+            background: #f8f9fa;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 5px solid #007bff;
+        }
+
+        #question-box {
+            background: #e6f0ff;
+            padding: 20px;
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="start-screen" class="screen active">
+            <h1>Inne Pytanie</h1>
+            <input type="text" id="player-name" placeholder="Twoje imię">
+            <button class="btn-primary" onclick="createRoom()">Stwórz Pokój (Host)</button>
+            <div style="margin: 20px 0; color: #888;">— LUB —</div>
+            <input type="text" id="join-code" placeholder="Kod pokoju (4 znaki)">
+            <button class="btn-success" onclick="joinRoom()">Dołącz do gry</button>
+        </div>
+
+        <div id="lobby-screen" class="screen">
+            <h2>Kod pokoju:</h2>
+            <div class="room-code-display" id="display-code">----</div>
+            <h3>Gracze w lobby:</h3>
+            <ul id="player-list"></ul>
+            <div id="host-controls" style="display:none;">
+                <button class="btn-success" onclick="hostStartGame()">ROZPOCZNIJ GRĘ</button>
+            </div>
+            <p id="wait-msg">Czekamy na start gry przez Hosta...</p>
+        </div>
+
+        <div id="game-screen" class="screen">
+            <h2 id="role-text">Twoja Rola</h2>
+            <div id="question-box">
+                <p style="font-size: 0.9em; color: #666;">Twoje pytanie:</p>
+                <p id="player-question" style="font-size: 1.2em; font-weight: bold;"></p>
+            </div>
+            <input type="text" id="answer-input" placeholder="Wpisz swoją odpowiedź...">
+            <button class="btn-primary" onclick="submitAnswer()">Wyślij Odpowiedź</button>
+        </div>
+
+        <div id="waiting-others-screen" class="screen">
+            <h2>Zapisano!</h2>
+            <p>Czekamy, aż wszyscy gracze wyślą swoje odpowiedzi...</p>
+        </div>
+
+        <div id="results-screen" class="screen">
+            <h2>Wyniki</h2>
+            <p id="revealed-q-crew" style="font-style: italic; color: #555;"></p>
+            <ul id="answers-list"></ul>
+            <div id="host-reveal-btn" style="display:none;">
+                <button class="btn-danger" onclick="revealImpostor()">UJAWNIJ IMPOSTORA</button>
+            </div>
+            <button class="btn-primary" style="margin-top:20px;" onclick="location.reload()">Zagraj Ponownie</button>
+        </div>
+    </div>
+
+    <script>
+        // --- TWOJA KONFIGURACJA FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAQLLZui2v4j3nLLKXhp2brcqsgSyy0W2s",
+            authDomain: "menu-gier.firebaseapp.com",
+            databaseURL: "https://menu-gier-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "menu-gier",
+            storageBucket: "menu-gier.firebasestorage.app",
+            messagingSenderId: "442961627931",
+            appId: "1:442961627931:web:26453bd5720da6037d21be"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let currentRoom = null;
+        let myName = "";
+        let isHost = false;
+
+        const QUESTION_POOLS = [
+            { crew: "Jaką potrawę byś najchętniej zamówił?", imp: "Jaką potrawę byś ugotował na imprezę?" },
+            { crew: "Jaki kraj chciałbyś odwiedzić?", imp: "W jakim kraju mieszkało by ci się najlepiej?" },
+            { crew: "Jakie jest Twoje ulubione zwierzę?", imp: "Jakiego zwierzęcia byś nie chciał mieć?" },
+            { crew: "Jaki jest twój ulubiony kolor?", imp: "Jakiego koloru masz na sobie bluzkę?" }
+        ];
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function createRoom() {
+            myName = document.getElementById('player-name').value;
+            if (!myName) return alert("Wpisz swoje imię!");
+
+            const code = Math.random().toString(36).substring(2, 6).toUpperCase();
+            isHost = true;
+            currentRoom = code;
+
+            db.ref('rooms/' + code).set({
+                status: 'lobby',
+                hostName: myName,
+                players: { "p1": myName }
+            });
+
+            startListening(code);
+            showScreen('lobby-screen');
+        }
+
+        function joinRoom() {
+            const code = document.getElementById('join-code').value.toUpperCase();
+            myName = document.getElementById('player-name').value;
+            if (!code || !myName) return alert("Wpisz imię i kod!");
+
+            currentRoom = code;
+            db.ref('rooms/' + code + '/players').push(myName);
+
+            startListening(code);
+            showScreen('lobby-screen');
+        }
+
+        function startListening(code) {
+            document.getElementById('display-code').innerText = code;
+
+            db.ref('rooms/' + code).on('value', (snap) => {
+                const data = snap.val();
+                if (!data) return;
+
+                // Aktualizacja listy graczy
+                const list = document.getElementById('player-list');
+                list.innerHTML = "";
+                const playersArray = Object.values(data.players || {});
+                playersArray.forEach(name => {
+                    list.innerHTML += `<li>${name}</li>`;
+                });
+
+                // Sterowanie Hostem
+                if (isHost) document.getElementById('host-controls').style.display = 'block';
+
+                // Przejście do gry
+                if (data.status === 'playing') {
+                    setupGame(data);
+                }
+
+                // Przejście do wyników
+                if (data.status === 'results') {
+                    displayResults(data);
+                }
+            });
+        }
+
+        function hostStartGame() {
+            db.ref('rooms/' + currentRoom + '/players').get().then(snap => {
+                const players = Object.values(snap.val());
+                const impName = players[Math.floor(Math.random() * players.length)];
+                const q = QUESTION_POOLS[Math.floor(Math.random() * QUESTION_POOLS.length)];
+
+                db.ref('rooms/' + currentRoom).update({
+                    status: 'playing',
+                    impostor: impName,
+                    qCrew: q.crew,
+                    qImp: q.imp
+                });
+            });
+        }
+
+        function setupGame(data) {
+            showScreen('game-screen');
+            const isImp = (myName === data.impostor);
+            document.getElementById('role-text').innerText = isImp ? "Jesteś IMPOSTOREM" : "Jesteś ZAŁOGANTEM";
+            document.getElementById('role-text').style.color = isImp ? "#dc3545" : "#28a745";
+            document.getElementById('player-question').innerText = isImp ? data.qImp : data.qCrew;
+        }
+
+        function submitAnswer() {
+            const ans = document.getElementById('answer-input').value;
+            if (!ans) return alert("Wpisz odpowiedź!");
+
+            db.ref('rooms/' + currentRoom + '/answers').push({
+                name: myName,
+                text: ans
+            });
+
+            showScreen('waiting-others-screen');
+
+            if (isHost) {
+                // Host może zakończyć zbieranie odpowiedzi
+                setTimeout(() => {
+                    db.ref('rooms/' + currentRoom).update({ status: 'results' });
+                }, 2000);
+            }
+        }
+
+        function displayResults(data) {
+            showScreen('results-screen');
+            document.getElementById('revealed-q-crew').innerText = "Pytanie Załogantów: " + data.qCrew;
+
+            const list = document.getElementById('answers-list');
+            list.innerHTML = "";
+            Object.values(data.answers || {}).forEach(ans => {
+                list.innerHTML += `<li><b>${ans.name}:</b> ${ans.text}</li>`;
+            });
+
+            if (isHost) document.getElementById('host-reveal-btn').style.display = 'block';
+        }
+
+        function revealImpostor() {
+            db.ref('rooms/' + currentRoom + '/impostor').get().then(snap => {
+                alert("IMPOSTOREM JEST: " + snap.val());
+            });
+        }
+    </script>
+</body>
+</html>
