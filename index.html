@@ -19,10 +19,8 @@
         .btn-primary { background: var(--accent); color: #0f172a; }
         .btn-opt { background: #334155; color: white; border: 1px solid #475569; }
         .game-item { background: #1e293b; border: 2px solid #334155; padding: 15px; border-radius: 16px; margin: 10px 0; cursor: pointer; text-align: left; }
-        .q-circle { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #334155; margin: 0 4px; }
-        .q-active { background: var(--accent); }
-        .q-done { background: var(--success); }
-        .reveal-item { background: #0f172a; padding: 15px; border-radius: 12px; margin-bottom: 10px; text-align: left; border-left: 5px solid #334155; }
+        .badge-turn { float: right; background: var(--success); color: white; padding: 2px 8px; border-radius: 6px; font-size: 0.7em; }
+        .reveal-item { background: #0f172a; padding: 12px; border-radius: 12px; margin-bottom: 8px; text-align: left; border-left: 5px solid #334155; font-size: 0.9em; }
         .reveal-match { border-left-color: var(--success); }
         .reveal-miss { border-left-color: var(--danger); }
         input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
@@ -55,13 +53,20 @@
             <h2 id="q-text">...</h2>
             <div id="options-area"></div>
             <p id="game-status" style="color: var(--accent); font-weight: bold;"></p>
-            <button class="btn-opt" onclick="showMenu()">POWRÓT</button>
+            
+            <div id="history-section" class="hidden" style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #475569;">
+                <p style="font-size: 0.8em; color: #94a3b8; margin-bottom: 10px;">Ostatni wynik:</p>
+                <div id="history-list"></div>
+            </div>
+
+            <button class="btn-opt" style="margin-top: 20px;" onclick="showMenu()">POWRÓT</button>
         </div>
 
         <div id="screen-reveal" class="card hidden">
-            <h2 style="color: var(--success)">Wyniki rundy!</h2>
+            <h2 style="color: var(--success)">Koniec serii!</h2>
+            <p>Oto jak Ci poszło:</p>
             <div id="reveal-list"></div>
-            <button class="btn-primary" onclick="confirmReveal()">KONTYNUUJ</button>
+            <button class="btn-primary" onclick="confirmReveal()">ZATWIERDŹ I ZAMIEŃ ROLĘ</button>
         </div>
     </div>
 
@@ -90,11 +95,11 @@
             const nick = document.getElementById('login-nick').value.trim();
             const pin = document.getElementById('login-pin').value.trim();
             if(!nick || pin.length < 4) return alert("Podaj nick i PIN!");
-            db.ref('evo_v4/users/'+nick).once('value', snap => {
+            db.ref('evo_v5/users/'+nick).once('value', snap => {
                 if(snap.exists() && snap.val().pin !== pin) return alert("Zły PIN!");
-                if(!snap.exists()) db.ref('evo_v4/users/'+nick).set({nick, pin});
+                if(!snap.exists()) db.ref('evo_v5/users/'+nick).set({nick, pin});
                 currentUser = nick;
-                localStorage.setItem('test_v4_nick', nick);
+                localStorage.setItem('test_v5_nick', nick);
                 showMenu();
             });
         }
@@ -108,7 +113,7 @@
         }
 
         function loadGames() {
-            db.ref('evo_v4/relations').on('value', snap => {
+            db.ref('evo_v5/relations').on('value', snap => {
                 const list = document.getElementById('games-list');
                 list.innerHTML = "";
                 const data = snap.val() || {};
@@ -119,7 +124,7 @@
                         const isMyTurn = (rel.turn === currentUser);
                         const div = document.createElement('div');
                         div.className = "game-item";
-                        div.innerHTML = `${isMyTurn ? '<span class="badge-turn">TWÓJ RUCH</span>' : ''}
+                        div.innerHTML = `${isMyTurn ? '<span class="badge-turn">TWOJA KOLEJ</span>' : ''}
                             <strong>${partner}</strong><br><small>LVL ${rel.level} • Zgodność ${rel.total > 0 ? Math.round(rel.correct/rel.total*100) : 0}%</small>`;
                         div.onclick = () => openGame(id, partner);
                         list.appendChild(div);
@@ -132,12 +137,12 @@
             const target = document.getElementById('target-nick').value.trim();
             if(!target || target === currentUser) return;
             const id = [currentUser, target].sort().join("_");
-            db.ref('evo_v4/relations/'+id).once('value', snap => {
+            db.ref('evo_v5/relations/'+id).once('value', snap => {
                 if(!snap.exists()) {
-                    db.ref('evo_v4/relations/'+id).set({
+                    db.ref('evo_v5/relations/'+id).set({
                         level: 1, xp: 0, turn: currentUser, step: "ASKING",
                         currentQIdx: 0, qPack: [0,1,2], answers: [], guesses: [],
-                        correct: 0, total: 0
+                        correct: 0, total: 0, lastResult: null
                     });
                 }
                 openGame(id, target);
@@ -146,25 +151,32 @@
 
         function openGame(relId, partner) {
             activeRelId = relId; hideAll();
-            db.ref('evo_v4/relations/'+relId).on('value', snap => {
+            db.ref('evo_v5/relations/'+relId).on('value', snap => {
                 const d = snap.val(); if(!d || activeRelId !== relId) return;
 
                 if(d.step === "REVEAL" && d.turn === currentUser) {
-                    showReveal(d, partner);
-                    return;
+                    showReveal(d, partner); return;
                 }
 
                 document.getElementById('screen-game').classList.remove('hidden');
                 document.getElementById('rel-level').innerText = `POZIOM ${d.level}`;
                 document.getElementById('rel-xp-fill').style.width = (d.xp / (d.level * 300) * 100) + "%";
                 
-                const dots = document.getElementById('q-dots'); dots.innerHTML = "";
-                for(let i=0; i<Q_PER_ROUND; i++) {
-                    const dot = document.createElement('span');
-                    dot.className = `q-circle ${i < d.currentQIdx ? 'q-done' : (i === d.currentQIdx ? 'q-active' : '')}`;
-                    dots.appendChild(dot);
-                }
+                // Historia dla osoby, która czeka (lub po prostu podgląd)
+                const histSec = document.getElementById('history-section');
+                const histList = document.getElementById('history-list');
+                if(d.lastResult) {
+                    histSec.classList.remove('hidden');
+                    histList.innerHTML = "";
+                    d.lastResult.forEach(res => {
+                        const div = document.createElement('div');
+                        div.className = `reveal-item ${res.match ? 'reveal-match' : 'reveal-miss'}`;
+                        div.innerHTML = `<small>${res.q}</small><br>Wybrano: ${res.ans} ${res.match ? '✅' : '❌'}`;
+                        histList.appendChild(div);
+                    });
+                } else { histSec.classList.add('hidden'); }
 
+                // Pytania
                 if(d.turn === currentUser) {
                     const q = QUESTIONS[d.qPack[d.currentQIdx]];
                     document.getElementById('q-text').innerText = q.q;
@@ -176,83 +188,63 @@
                         optArea.appendChild(b);
                     });
                 } else {
-                    document.getElementById('q-text').innerText = "Czekaj na ruch...";
-                    document.getElementById('game-status').innerText = `Kolej partnera: ${partner}`;
+                    document.getElementById('q-text').innerText = "Ruch partnera...";
+                    document.getElementById('game-status').innerText = `Teraz ${partner} wykonuje ruch. Wróć później!`;
                     document.getElementById('options-area').innerHTML = "";
                 }
             });
         }
 
         function handleMove(relId, data, val, partner) {
-            const ref = db.ref('evo_v4/relations/'+relId);
+            const ref = db.ref('evo_v5/relations/'+relId);
             if(data.step === "ASKING") {
-                let ans = data.answers || [];
-                ans.push(val);
-                if(ans.length >= Q_PER_ROUND) {
-                    ref.update({ answers: ans, step: "GUESSING", currentQIdx: 0, turn: partner });
-                } else {
-                    ref.update({ answers: ans, currentQIdx: data.currentQIdx + 1 });
-                }
+                let ans = data.answers || []; ans.push(val);
+                if(ans.length >= Q_PER_ROUND) ref.update({ answers: ans, step: "GUESSING", currentQIdx: 0, turn: partner });
+                else ref.update({ answers: ans, currentQIdx: data.currentQIdx + 1 });
             } else if(data.step === "GUESSING") {
-                let g = data.guesses || [];
-                g.push(val);
-                if(g.length >= Q_PER_ROUND) {
-                    ref.update({ guesses: g, step: "REVEAL" });
-                } else {
-                    ref.update({ guesses: g, currentQIdx: data.currentQIdx + 1 });
-                }
+                let g = data.guesses || []; g.push(val);
+                if(g.length >= Q_PER_ROUND) ref.update({ guesses: g, step: "REVEAL" });
+                else ref.update({ guesses: g, currentQIdx: data.currentQIdx + 1 });
             }
         }
 
         function showReveal(data, partner) {
-            hideAll();
-            document.getElementById('screen-reveal').classList.remove('hidden');
-            const list = document.getElementById('reveal-list');
-            list.innerHTML = "";
-            
+            hideAll(); document.getElementById('screen-reveal').classList.remove('hidden');
+            const list = document.getElementById('reveal-list'); list.innerHTML = "";
             data.qPack.forEach((qIdx, i) => {
-                const q = QUESTIONS[qIdx];
                 const isMatch = data.answers[i] === data.guesses[i];
                 const item = document.createElement('div');
                 item.className = `reveal-item ${isMatch ? 'reveal-match' : 'reveal-miss'}`;
-                item.innerHTML = `
-                    <small style="color:var(--accent)">${q.q}</small><br>
-                    <strong>${partner} wybrał:</strong> ${data.answers[i]}<br>
-                    <strong>Twoje zgadnięcie:</strong> ${data.guesses[i]} ${isMatch ? '✅' : '❌'}
-                `;
+                item.innerHTML = `<strong>${QUESTIONS[qIdx].q}</strong><br>Wybrano: ${data.answers[i]} ${isMatch ? '✅' : '❌'}`;
                 list.appendChild(item);
             });
         }
 
         function confirmReveal() {
-            const ref = db.ref('evo_v4/relations/'+activeRelId);
+            const ref = db.ref('evo_v5/relations/'+activeRelId);
             ref.once('value', snap => {
                 const d = snap.val();
-                let correctInRound = 0;
-                d.answers.forEach((a, i) => { if(a === d.guesses[i]) correctInRound++; });
+                let correctCount = 0;
+                let history = d.qPack.map((qIdx, i) => {
+                    const match = d.answers[i] === d.guesses[i];
+                    if(match) correctCount++;
+                    return { q: QUESTIONS[qIdx].q, ans: d.answers[i], match: match };
+                });
 
-                let newXP = d.xp + (correctInRound * 50) + 20;
-                let newLvl = d.level;
-                if(newXP >= d.level * 300) { newXP = 0; newLvl++; }
+                let newXP = d.xp + (correctCount * 100) + 20;
+                let newLvl = d.level; if(newXP >= d.level * 300) { newXP = 0; newLvl++; }
 
                 ref.update({
-                    xp: newXP, level: newLvl,
-                    correct: d.correct + correctInRound,
-                    total: d.total + Q_PER_ROUND,
-                    answers: [], guesses: [],
-                    qPack: Array.from({length: Q_PER_ROUND}, () => Math.floor(Math.random() * QUESTIONS.length)),
-                    currentQIdx: 0,
-                    step: "ASKING",
-                    turn: currentUser // Teraz osoba która zgadywała, zaczyna odpowiadać o sobie
+                    xp: newXP, level: newLvl, correct: d.correct + correctCount, total: d.total + Q_PER_ROUND,
+                    lastResult: history, // Zapisujemy historię dla obu graczy
+                    answers: [], guesses: [], currentQIdx: 0, step: "ASKING", turn: currentUser,
+                    qPack: Array.from({length: Q_PER_ROUND}, () => Math.floor(Math.random() * QUESTIONS.length))
                 });
             });
         }
 
-        function hideAll() { 
-            document.querySelectorAll('.card').forEach(c => c.classList.add('hidden')); 
-        }
-
-        const saved = localStorage.getItem('test_v4_nick');
+        function hideAll() { document.querySelectorAll('.card').forEach(c => c.classList.add('hidden')); }
+        const saved = localStorage.getItem('test_v5_nick');
         if(saved) { currentUser = saved; showMenu(); }
     </script>
 </body>
