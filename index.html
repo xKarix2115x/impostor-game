@@ -3,74 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Test: Evolution 🧬</title>
+    <title>Gierki by Kamil 🧬</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --success: #22c55e; --danger: #ef4444; --xp: #f59e0b; --text: #f8fafc; }
-        body { background: var(--bg); font-family: 'Segoe UI', sans-serif; color: var(--text); margin: 0; display: flex; justify-content: center; min-height: 100vh; }
-        .container { width: 95%; max-width: 500px; padding: 20px; }
-        .card { background: var(--card); padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); margin-bottom: 20px; border: 1px solid #334155; text-align: center; }
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #38bdf8;
+            --text: #f1f5f9;
+        }
+        body {
+            background: var(--bg);
+            font-family: 'Segoe UI', sans-serif;
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container { width: 95%; max-width: 450px; padding: 20px; text-align: center; }
+        
+        /* Ekran Główny */
+        .header-title { font-size: 3rem; font-weight: 800; margin-bottom: 0; }
+        .header-subtitle { font-size: 1.2rem; color: var(--accent); margin-top: -5px; margin-bottom: 40px; opacity: 0.8; }
+        
+        .main-btn {
+            background: var(--card);
+            border: 2px solid #334155;
+            padding: 30px;
+            border-radius: 24px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: block;
+            width: 100%;
+        }
+        .main-btn:hover { border-color: var(--accent); transform: translateY(-5px); }
+        .main-btn h2 { margin: 0; font-size: 1.8rem; }
+        .main-btn p { margin: 5px 0 0 0; font-size: 0.9rem; color: #94a3b8; }
+
+        /* Karty i Logowanie */
+        .card { background: var(--card); padding: 25px; border-radius: 24px; border: 1px solid #334155; }
         .hidden { display: none !important; }
-        .level-badge { background: var(--xp); color: #000; padding: 6px 18px; border-radius: 50px; font-weight: 800; display: inline-block; margin-bottom: 15px; text-transform: uppercase; font-size: 0.8em; }
-        .xp-bar { width: 100%; height: 12px; background: #334155; border-radius: 6px; margin: 15px 0; overflow: hidden; border: 1px solid #475569; }
-        .xp-fill { height: 100%; background: var(--xp); transition: width 0.6s; }
-        button { width: 100%; padding: 16px; margin: 10px 0; border: none; border-radius: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 1em; }
-        .btn-primary { background: var(--accent); color: #0f172a; }
-        .btn-opt { background: #334155; color: white; border: 1px solid #475569; }
-        .game-item { background: #1e293b; border: 2px solid #334155; padding: 15px; border-radius: 16px; margin: 10px 0; cursor: pointer; text-align: left; }
-        .badge-turn { float: right; background: var(--success); color: white; padding: 2px 8px; border-radius: 6px; font-size: 0.7em; }
-        .reveal-item { background: #0f172a; padding: 12px; border-radius: 12px; margin-bottom: 8px; text-align: left; border-left: 5px solid #334155; font-size: 0.9em; }
-        .reveal-match { border-left-color: var(--success); }
-        .reveal-miss { border-left-color: var(--danger); }
-        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+
+        input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+        button.action-btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; background: var(--accent); color: #0f172a; cursor: pointer; margin-top: 10px; }
+        
+        .back-btn { background: none; border: none; color: #94a3b8; cursor: pointer; margin-top: 20px; text-decoration: underline; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div id="screen-auth" class="card">
-            <h1>The Test 🧬</h1>
-            <input type="text" id="login-nick" placeholder="Twój Nick">
-            <input type="password" id="login-pin" placeholder="PIN (4 cyfry)">
-            <button class="btn-primary" onclick="handleLogin()">ZALOGUJ / STWÓRZ</button>
-        </div>
+        
+        <div id="screen-launcher">
+            <h1 class="header-title">Gierki</h1>
+            <p class="header-subtitle">by Kamil</p>
 
-        <div id="screen-menu" class="card hidden">
-            <div class="level-badge">Witaj, <span id="display-name"></span></div>
-            <div id="games-list"></div>
-            <div style="margin-top: 20px; border-top: 1px solid #334155; padding-top: 15px;">
-                <input type="text" id="target-nick" placeholder="Nick partnera">
-                <button class="btn-primary" onclick="startNewRelation()">NOWA GRA</button>
-                <button class="btn-opt" onclick="logout()">WYLOGUJ</button>
+            <div class="main-btn" onclick="showImpostorMenu()">
+                <h2>🕵️‍♂️ Impostor</h2>
+                <p>Szybka gra imprezowa (brak kont)</p>
+            </div>
+
+            <div class="main-btn" onclick="showTestMenu()">
+                <h2>🧬 The Test</h2>
+                <p>Ewolucja relacji (wymaga logowania)</p>
             </div>
         </div>
 
-        <div id="screen-game" class="card hidden">
-            <div class="level-badge" id="rel-level">POZIOM 1</div>
-            <div class="xp-bar"><div id="rel-xp-fill" class="xp-fill"></div></div>
-            <div id="q-dots" style="margin-bottom: 20px;"></div>
-            <h2 id="q-text">...</h2>
-            <div id="options-area"></div>
-            <p id="game-status" style="color: var(--accent); font-weight: bold;"></p>
-            
-            <div id="history-section" class="hidden" style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #475569;">
-                <p style="font-size: 0.8em; color: #94a3b8; margin-bottom: 10px;">Ostatni wynik:</p>
-                <div id="history-list"></div>
-            </div>
-
-            <button class="btn-opt" style="margin-top: 20px;" onclick="showMenu()">POWRÓT</button>
+        <div id="screen-impostor-auth" class="card hidden">
+            <h2>Tryb Impostor</h2>
+            <input type="text" id="imp-nick" placeholder="Twój Nick">
+            <input type="text" id="imp-room" placeholder="Kod pokoju">
+            <button class="action-btn" onclick="alert('Tu wstawimy Twoją starą logikę Impostora')">STWÓRZ POKÓJ</button>
+            <button class="action-btn" style="background: #94a3b8;" onclick="alert('Tu dołączanie do Impostora')">DOŁĄCZ</button>
+            <button class="back-btn" onclick="goBack()">← Wróć do wyboru gier</button>
         </div>
 
-        <div id="screen-reveal" class="card hidden">
-            <h2 style="color: var(--success)">Koniec serii!</h2>
-            <p>Oto jak Ci poszło:</p>
-            <div id="reveal-list"></div>
-            <button class="btn-primary" onclick="confirmReveal()">ZATWIERDŹ I ZAMIEŃ ROLĘ</button>
+        <div id="screen-test-auth" class="card hidden">
+            <h2>Logowanie: The Test</h2>
+            <p>Twoje postępy są zapisywane na koncie.</p>
+            <input type="text" id="test-nick" placeholder="Nick">
+            <input type="password" id="test-pin" placeholder="PIN (4 cyfry)">
+            <button class="action-btn" onclick="handleTestLogin()">ZALOGUJ / STWÓRZ</button>
+            <button class="back-btn" onclick="goBack()">← Wróć do wyboru gier</button>
         </div>
+
+        <div id="screen-test-main" class="card hidden">
+            <h2 id="welcome-msg">Witaj!</h2>
+            <p>Tu będzie lista Twoich relacji i statystyki...</p>
+            <button class="back-btn" onclick="logoutTest()">Wyloguj</button>
+        </div>
+
     </div>
 
     <script>
+        // --- KONFIGURACJA FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyAQLLZui2v4j3nLLKXhp2brcqsgSyy0W2s",
             databaseURL: "https://menu-gier-default-rtdb.europe-west1.firebasedatabase.app",
@@ -78,174 +107,72 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let currentUser = null;
-        let activeRelId = null;
-        const Q_PER_ROUND = 3;
-
-        const QUESTIONS = [
-            { q: "Gdzie widzisz się za 10 lat?", o: ["Własna firma", "Podróże", "Rodzina"] },
-            { q: "Twoja najgorsza cecha?", o: ["Lenistwo", "Nerwowość", "Gadulstwo"] },
-            { q: "Idealny wieczór?", o: ["Impreza", "Netflix", "Sport"] },
-            { q: "Kto więcej marudzi?", o: ["Ja", "Ty", "Oboje"] },
-            { q: "Priorytet w życiu?", o: ["Pieniądze", "Szczęście", "Spokój"] },
-            { q: "Gdy wygram milion...", o: ["Inwestuję", "Wydaję", "Pomagam"] }
-        ];
-
-        function handleLogin() {
-            const nick = document.getElementById('login-nick').value.trim();
-            const pin = document.getElementById('login-pin').value.trim();
-            if(!nick || pin.length < 4) return alert("Podaj nick i PIN!");
-            db.ref('evo_v5/users/'+nick).once('value', snap => {
-                if(snap.exists() && snap.val().pin !== pin) return alert("Zły PIN!");
-                if(!snap.exists()) db.ref('evo_v5/users/'+nick).set({nick, pin});
-                currentUser = nick;
-                localStorage.setItem('test_v5_nick', nick);
-                showMenu();
-            });
+        // --- NAWIGACJA ---
+        function showImpostorMenu() {
+            hideAll();
+            document.getElementById('screen-impostor-auth').classList.remove('hidden');
         }
 
-        function logout() { localStorage.clear(); location.reload(); }
-
-        function showMenu() {
-            hideAll(); document.getElementById('screen-menu').classList.remove('hidden');
-            document.getElementById('display-name').innerText = currentUser;
-            loadGames();
-        }
-
-        function loadGames() {
-            db.ref('evo_v5/relations').on('value', snap => {
-                const list = document.getElementById('games-list');
-                list.innerHTML = "";
-                const data = snap.val() || {};
-                Object.keys(data).forEach(id => {
-                    if(id.includes(currentUser)) {
-                        const rel = data[id];
-                        const partner = id.replace(currentUser, "").replace("_", "");
-                        const isMyTurn = (rel.turn === currentUser);
-                        const div = document.createElement('div');
-                        div.className = "game-item";
-                        div.innerHTML = `${isMyTurn ? '<span class="badge-turn">TWOJA KOLEJ</span>' : ''}
-                            <strong>${partner}</strong><br><small>LVL ${rel.level} • Zgodność ${rel.total > 0 ? Math.round(rel.correct/rel.total*100) : 0}%</small>`;
-                        div.onclick = () => openGame(id, partner);
-                        list.appendChild(div);
-                    }
-                });
-            });
-        }
-
-        function startNewRelation() {
-            const target = document.getElementById('target-nick').value.trim();
-            if(!target || target === currentUser) return;
-            const id = [currentUser, target].sort().join("_");
-            db.ref('evo_v5/relations/'+id).once('value', snap => {
-                if(!snap.exists()) {
-                    db.ref('evo_v5/relations/'+id).set({
-                        level: 1, xp: 0, turn: currentUser, step: "ASKING",
-                        currentQIdx: 0, qPack: [0,1,2], answers: [], guesses: [],
-                        correct: 0, total: 0, lastResult: null
-                    });
-                }
-                openGame(id, target);
-            });
-        }
-
-        function openGame(relId, partner) {
-            activeRelId = relId; hideAll();
-            db.ref('evo_v5/relations/'+relId).on('value', snap => {
-                const d = snap.val(); if(!d || activeRelId !== relId) return;
-
-                if(d.step === "REVEAL" && d.turn === currentUser) {
-                    showReveal(d, partner); return;
-                }
-
-                document.getElementById('screen-game').classList.remove('hidden');
-                document.getElementById('rel-level').innerText = `POZIOM ${d.level}`;
-                document.getElementById('rel-xp-fill').style.width = (d.xp / (d.level * 300) * 100) + "%";
-                
-                // Historia dla osoby, która czeka (lub po prostu podgląd)
-                const histSec = document.getElementById('history-section');
-                const histList = document.getElementById('history-list');
-                if(d.lastResult) {
-                    histSec.classList.remove('hidden');
-                    histList.innerHTML = "";
-                    d.lastResult.forEach(res => {
-                        const div = document.createElement('div');
-                        div.className = `reveal-item ${res.match ? 'reveal-match' : 'reveal-miss'}`;
-                        div.innerHTML = `<small>${res.q}</small><br>Wybrano: ${res.ans} ${res.match ? '✅' : '❌'}`;
-                        histList.appendChild(div);
-                    });
-                } else { histSec.classList.add('hidden'); }
-
-                // Pytania
-                if(d.turn === currentUser) {
-                    const q = QUESTIONS[d.qPack[d.currentQIdx]];
-                    document.getElementById('q-text').innerText = q.q;
-                    document.getElementById('game-status').innerText = d.step === "ASKING" ? "Odpowiedz o sobie" : `Co wybrał ${partner}?`;
-                    const optArea = document.getElementById('options-area'); optArea.innerHTML = "";
-                    q.o.forEach(opt => {
-                        const b = document.createElement('button'); b.className = "btn-opt"; b.innerText = opt;
-                        b.onclick = () => handleMove(relId, d, opt, partner);
-                        optArea.appendChild(b);
-                    });
-                } else {
-                    document.getElementById('q-text').innerText = "Ruch partnera...";
-                    document.getElementById('game-status').innerText = `Teraz ${partner} wykonuje ruch. Wróć później!`;
-                    document.getElementById('options-area').innerHTML = "";
-                }
-            });
-        }
-
-        function handleMove(relId, data, val, partner) {
-            const ref = db.ref('evo_v5/relations/'+relId);
-            if(data.step === "ASKING") {
-                let ans = data.answers || []; ans.push(val);
-                if(ans.length >= Q_PER_ROUND) ref.update({ answers: ans, step: "GUESSING", currentQIdx: 0, turn: partner });
-                else ref.update({ answers: ans, currentQIdx: data.currentQIdx + 1 });
-            } else if(data.step === "GUESSING") {
-                let g = data.guesses || []; g.push(val);
-                if(g.length >= Q_PER_ROUND) ref.update({ guesses: g, step: "REVEAL" });
-                else ref.update({ guesses: g, currentQIdx: data.currentQIdx + 1 });
+        function showTestMenu() {
+            hideAll();
+            // Sprawdź czy już zalogowany w localStorage
+            const savedNick = localStorage.getItem('test_nick');
+            if(savedNick) {
+                showTestDashboard(savedNick);
+            } else {
+                document.getElementById('screen-test-auth').classList.remove('hidden');
             }
         }
 
-        function showReveal(data, partner) {
-            hideAll(); document.getElementById('screen-reveal').classList.remove('hidden');
-            const list = document.getElementById('reveal-list'); list.innerHTML = "";
-            data.qPack.forEach((qIdx, i) => {
-                const isMatch = data.answers[i] === data.guesses[i];
-                const item = document.createElement('div');
-                item.className = `reveal-item ${isMatch ? 'reveal-match' : 'reveal-miss'}`;
-                item.innerHTML = `<strong>${QUESTIONS[qIdx].q}</strong><br>Wybrano: ${data.answers[i]} ${isMatch ? '✅' : '❌'}`;
-                list.appendChild(item);
+        function goBack() {
+            hideAll();
+            document.getElementById('screen-launcher').classList.remove('hidden');
+        }
+
+        function hideAll() {
+            document.getElementById('screen-launcher').classList.add('hidden');
+            document.getElementById('screen-impostor-auth').classList.add('hidden');
+            document.getElementById('screen-test-auth').classList.add('hidden');
+            document.getElementById('screen-test-main').classList.add('hidden');
+        }
+
+        // --- LOGIKA THE TEST ---
+        function handleTestLogin() {
+            const nick = document.getElementById('test-nick').value.trim();
+            const pin = document.getElementById('test-pin').value.trim();
+            
+            if(!nick || pin.length < 4) return alert("Podaj nick i 4-cyfrowy PIN");
+
+            db.ref('evo_v5/users/' + nick).once('value', snap => {
+                if(snap.exists()) {
+                    if(snap.val().pin === pin) {
+                        loginSuccess(nick);
+                    } else {
+                        alert("Błędny PIN!");
+                    }
+                } else {
+                    // Tworzenie nowego konta
+                    db.ref('evo_v5/users/' + nick).set({ nick, pin }).then(() => loginSuccess(nick));
+                }
             });
         }
 
-        function confirmReveal() {
-            const ref = db.ref('evo_v5/relations/'+activeRelId);
-            ref.once('value', snap => {
-                const d = snap.val();
-                let correctCount = 0;
-                let history = d.qPack.map((qIdx, i) => {
-                    const match = d.answers[i] === d.guesses[i];
-                    if(match) correctCount++;
-                    return { q: QUESTIONS[qIdx].q, ans: d.answers[i], match: match };
-                });
-
-                let newXP = d.xp + (correctCount * 100) + 20;
-                let newLvl = d.level; if(newXP >= d.level * 300) { newXP = 0; newLvl++; }
-
-                ref.update({
-                    xp: newXP, level: newLvl, correct: d.correct + correctCount, total: d.total + Q_PER_ROUND,
-                    lastResult: history, // Zapisujemy historię dla obu graczy
-                    answers: [], guesses: [], currentQIdx: 0, step: "ASKING", turn: currentUser,
-                    qPack: Array.from({length: Q_PER_ROUND}, () => Math.floor(Math.random() * QUESTIONS.length))
-                });
-            });
+        function loginSuccess(nick) {
+            localStorage.setItem('test_nick', nick);
+            showTestDashboard(nick);
         }
 
-        function hideAll() { document.querySelectorAll('.card').forEach(c => c.classList.add('hidden')); }
-        const saved = localStorage.getItem('test_v5_nick');
-        if(saved) { currentUser = saved; showMenu(); }
+        function showTestDashboard(nick) {
+            hideAll();
+            document.getElementById('screen-test-main').classList.remove('hidden');
+            document.getElementById('welcome-msg').innerText = "Witaj, " + nick;
+            // Tu docelowo wkleimy całą listę gier z poprzedniego kodu
+        }
+
+        function logoutTest() {
+            localStorage.removeItem('test_nick');
+            goBack();
+        }
     </script>
 </body>
 </html>
