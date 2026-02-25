@@ -8,66 +8,54 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --success: #22c55e; --xp: #f59e0b; --text: #f8fafc; }
-        body { background: var(--bg); font-family: 'Segoe UI', Tahoma, sans-serif; color: var(--text); margin: 0; display: flex; justify-content: center; min-height: 100vh; }
+        body { background: var(--bg); font-family: 'Segoe UI', sans-serif; color: var(--text); margin: 0; display: flex; justify-content: center; min-height: 100vh; }
         .container { width: 95%; max-width: 500px; padding: 20px; }
         .card { background: var(--card); padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); margin-bottom: 20px; border: 1px solid #334155; text-align: center; }
         .hidden { display: none !important; }
-        
-        /* Progress & Levels */
         .level-badge { background: var(--xp); color: #000; padding: 6px 18px; border-radius: 50px; font-weight: 800; display: inline-block; margin-bottom: 15px; text-transform: uppercase; font-size: 0.8em; }
         .xp-bar { width: 100%; height: 12px; background: #334155; border-radius: 6px; margin: 15px 0; overflow: hidden; border: 1px solid #475569; }
-        .xp-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
-
-        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 16px; margin: 10px 0; border: none; border-radius: 14px; font-weight: bold; cursor: pointer; transition: transform 0.2s, background 0.2s; font-size: 1em; }
-        button:active { transform: scale(0.98); }
+        .xp-fill { height: 100%; background: var(--xp); transition: width 0.6s; }
+        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 16px; margin: 10px 0; border: none; border-radius: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 1em; }
         .btn-primary { background: var(--accent); color: #0f172a; }
         .btn-opt { background: #334155; color: white; border: 1px solid #475569; }
-        
-        .game-item { background: #1e293b; border: 2px solid #334155; padding: 15px; border-radius: 16px; margin: 10px 0; cursor: pointer; text-align: left; transition: 0.3s; }
-        .game-item:hover { border-color: var(--accent); background: #263349; }
-        .game-item .badge-turn { float: right; background: var(--success); color: white; padding: 2px 8px; border-radius: 6px; font-size: 0.7em; }
-        
-        .option-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
-        .status-tag { color: var(--accent); font-weight: bold; font-size: 0.9em; margin-top: 15px; display: block; }
+        .game-item { background: #1e293b; border: 2px solid #334155; padding: 15px; border-radius: 16px; margin: 10px 0; cursor: pointer; text-align: left; }
+        .badge-turn { float: right; background: var(--success); color: white; padding: 2px 8px; border-radius: 6px; font-size: 0.7em; }
+        .q-circle { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #334155; margin: 0 4px; }
+        .q-active { background: var(--accent); }
+        .q-done { background: var(--success); }
     </style>
 </head>
 <body>
 
     <div class="container">
         <div id="screen-auth" class="card">
-            <h1 style="margin-bottom: 5px;">The Test</h1>
-            <p style="color: #94a3b8; margin-top: 0;">Zsynchronizuj swoją relację</p>
-            <input type="text" id="login-nick" placeholder="Twoje imię / Nick">
-            <input type="password" id="login-pin" placeholder="Twój PIN (np. 1234)">
-            <button class="btn-primary" onclick="handleLogin()">ZALOGUJ / STWÓRZ KONTO</button>
+            <h1>The Test 🧬</h1>
+            <input type="text" id="login-nick" placeholder="Twój Nick">
+            <input type="password" id="login-pin" placeholder="PIN (4 cyfry)">
+            <button class="btn-primary" onclick="handleLogin()">ZALOGUJ / STWÓRZ</button>
         </div>
 
         <div id="screen-menu" class="card hidden">
-            <div class="level-badge">Zalogowano jako <span id="display-name">...</span></div>
-            <h3 style="text-align: left; margin-top: 20px;">Twoje aktywne gry:</h3>
+            <div class="level-badge">Witaj, <span id="display-name"></span></div>
             <div id="games-list"></div>
-            
-            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #334155;">
-                <p style="font-size: 0.9em; color: #94a3b8;">Zacznij nową grę z kimś:</p>
-                <input type="text" id="target-nick" placeholder="Wpisz dokładnie Nick partnera">
-                <button class="btn-primary" onclick="startNewRelation()">ROZPOCZNIJ NOWY TEST</button>
-                <button class="btn-opt" style="margin-top: 20px; color: #94a3b8; font-size: 0.8em;" onclick="logout()">WYLOGUJ SIĘ</button>
+            <div style="margin-top: 20px; border-top: 1px solid #334155; padding-top: 15px;">
+                <input type="text" id="target-nick" placeholder="Nick partnera">
+                <button class="btn-primary" onclick="startNewRelation()">NOWA GRA</button>
+                <button class="btn-opt" onclick="logout()">WYLOGUJ</button>
             </div>
         </div>
 
         <div id="screen-game" class="card hidden">
-            <div id="relation-stats">
-                <div class="level-badge" id="rel-level">POZIOM 1</div>
-                <div class="xp-bar"><div id="rel-xp-fill" class="xp-fill"></div></div>
-                <p id="rel-info" style="font-size: 0.8em; color: #94a3b8;"></p>
-            </div>
+            <div class="level-badge" id="rel-level">POZIOM 1</div>
+            <div class="xp-bar"><div id="rel-xp-fill" class="xp-fill"></div></div>
             
-            <h2 id="q-text" style="margin: 30px 0 10px 0;">...</h2>
-            <div id="options-area" class="option-grid"></div>
+            <div id="q-dots" style="margin-bottom: 20px;"></div>
+            <h2 id="q-text">...</h2>
+            <div id="options-area"></div>
             
-            <span id="game-status" class="status-tag"></span>
-            <button class="btn-opt" style="margin-top: 30px;" onclick="showMenu()">WRÓĆ DO LISTY GIER</button>
+            <p id="game-status" style="color: var(--accent); font-weight: bold; margin-top: 20px;"></p>
+            <button class="btn-opt" onclick="showMenu()">POWRÓT</button>
         </div>
     </div>
 
@@ -81,170 +69,157 @@
 
         let currentUser = null;
         let activeRelId = null;
+        const QUESTIONS_PER_ROUND = 3;
 
         const QUESTIONS = [
-            { q: "Gdzie widzisz się za 10 lat?", o: ["Własna firma / Kariera", "Podróżowanie po świecie", "Spokojne życie rodzinne"] },
-            { q: "Jaka jest Twoja najgorsza cecha?", o: ["Lenistwo i prokrastynacja", "Brak cierpliwości / Nerwowość", "Zbyt duże gadulstwo"] },
-            { q: "Twój idealny wieczór to:", o: ["Impreza i dużo ludzi", "Cisza, Netflix i jedzenie", "Długi spacer lub sport"] },
-            { q: "Kto z nas ma trudniejszy charakter?", o: ["Zdecydowanie ja", "Druga osoba", "Jesteśmy tak samo trudni"] },
-            { q: "Gdybyśmy wygrali milion, to:", o: ["Inwestujemy w przyszłość", "Wydajemy na marzenia od razu", "Rozdajemy / Pomagamy innym"] },
-            { q: "Czego najbardziej nie lubisz robić?", o: ["Sprzątania / Gotowania", "Wstawania wcześnie rano", "Załatwiania spraw urzędowych"] }
+            { q: "Gdzie widzisz się za 10 lat?", o: ["Własna firma", "Podróże", "Rodzina"] },
+            { q: "Twoja najgorsza cecha?", o: ["Lenistwo", "Nerwowość", "Gadulstwo"] },
+            { q: "Idealny wieczór?", o: ["Impreza", "Netflix", "Sport"] },
+            { q: "Kto więcej marudzi?", o: ["Ja", "Ty", "Oboje"] },
+            { q: "Priorytet w życiu?", o: ["Pieniądze", "Szczęście", "Spokój"] },
+            { q: "Gdy wygram milion...", o: ["Inwestuję", "Wydaję", "Pomagam"] }
         ];
 
-        // LOGOWANIE
         function handleLogin() {
             const nick = document.getElementById('login-nick').value.trim();
             const pin = document.getElementById('login-pin').value.trim();
-            if(!nick || pin.length < 4) return alert("Podaj Nick i min. 4-cyfrowy PIN");
-
-            db.ref('evo_v2/users/' + nick).once('value', snap => {
-                if(snap.exists()) {
-                    if(snap.val().pin === pin) success(nick);
-                    else alert("Błędny PIN dla tego użytkownika!");
-                } else {
-                    db.ref('evo_v2/users/' + nick).set({ nick, pin }).then(() => success(nick));
-                }
+            if(!nick || pin.length < 4) return alert("Podaj nick i PIN!");
+            db.ref('evo_v3/users/'+nick).once('value', snap => {
+                if(snap.exists() && snap.val().pin !== pin) return alert("Zły PIN!");
+                if(!snap.exists()) db.ref('evo_v3/users/'+nick).set({nick, pin});
+                currentUser = nick;
+                localStorage.setItem('test_v3_nick', nick);
+                showMenu();
             });
         }
 
-        function success(nick) {
-            currentUser = nick;
-            localStorage.setItem('theTest_v2_nick', nick);
-            showMenu();
-        }
-
-        function logout() {
-            localStorage.clear();
-            location.reload();
-        }
+        function logout() { localStorage.clear(); location.reload(); }
 
         function showMenu() {
-            hideAll();
-            document.getElementById('screen-menu').classList.remove('hidden');
+            hideAll(); document.getElementById('screen-menu').classList.remove('hidden');
             document.getElementById('display-name').innerText = currentUser;
-            loadGamesList();
+            loadGames();
         }
 
-        // LISTA RELACJI
-        function loadGamesList() {
-            db.ref('evo_v2/relations').on('value', snap => {
+        function loadGames() {
+            db.ref('evo_v3/relations').on('value', snap => {
                 const list = document.getElementById('games-list');
                 list.innerHTML = "";
                 const data = snap.val() || {};
-                let found = false;
-
                 Object.keys(data).forEach(id => {
                     if(id.includes(currentUser)) {
-                        found = true;
                         const rel = data[id];
                         const partner = id.replace(currentUser, "").replace("_", "");
                         const isMyTurn = (rel.turn === currentUser);
-                        
                         const div = document.createElement('div');
                         div.className = "game-item";
-                        div.innerHTML = `
-                            ${isMyTurn ? '<span class="badge-turn">TWÓJ RUCH</span>' : ''}
-                            <strong>Relacja z: ${partner}</strong><br>
-                            <small style="color: #94a3b8">Poziom ${rel.level} • Zgodność ${rel.total > 0 ? Math.round(rel.correct/rel.total*100) : 0}%</small>
-                        `;
+                        div.innerHTML = `${isMyTurn ? '<span class="badge-turn">TWOJA KOLEJ</span>' : ''}
+                            <strong>${partner}</strong><br><small>Poziom ${rel.level} • Zgodność ${rel.total > 0 ? Math.round(rel.correct/rel.total*100) : 0}%</small>`;
                         div.onclick = () => openGame(id, partner);
                         list.appendChild(div);
                     }
                 });
-                if(!found) list.innerHTML = "<p style='color:#64748b; font-size: 0.9em;'>Nie masz jeszcze żadnych gier. Dodaj kogoś poniżej!</p>";
             });
         }
 
         function startNewRelation() {
             const target = document.getElementById('target-nick').value.trim();
-            if(!target || target === currentUser) return alert("Podaj poprawny nick partnera!");
-
-            const relId = [currentUser, target].sort().join("_");
-            db.ref('evo_v2/relations/' + relId).once('value', snap => {
+            if(!target || target === currentUser) return;
+            const id = [currentUser, target].sort().join("_");
+            db.ref('evo_v3/relations/'+id).once('value', snap => {
                 if(!snap.exists()) {
-                    db.ref('evo_v2/relations/' + relId).set({
+                    db.ref('evo_v3/relations/'+id).set({
                         level: 1, xp: 0, turn: currentUser, step: "ASKING",
-                        currentQ: Math.floor(Math.random()*QUESTIONS.length),
+                        currentQIdx: 0, qPack: generatePack(), answers: [],
                         correct: 0, total: 0
                     });
                 }
-                openGame(relId, target);
+                openGame(id, target);
             });
         }
 
-        // GRA
+        function generatePack() {
+            return Array.from({length: QUESTIONS_PER_ROUND}, () => Math.floor(Math.random() * QUESTIONS.length));
+        }
+
         function openGame(relId, partner) {
-            activeRelId = relId;
-            hideAll();
+            activeRelId = relId; hideAll();
             document.getElementById('screen-game').classList.remove('hidden');
-            
-            db.ref('evo_v2/relations/' + relId).on('value', snap => {
-                const d = snap.val();
-                if(!d || activeRelId !== relId) return;
-
-                // Statystyki
+            db.ref('evo_v3/relations/'+relId).on('value', snap => {
+                const d = snap.val(); if(!d || activeRelId !== relId) return;
+                
                 document.getElementById('rel-level').innerText = `POZIOM ${d.level}`;
-                document.getElementById('rel-xp-fill').style.width = (d.xp / (d.level * 200) * 100) + "%";
-                document.getElementById('rel-info').innerText = `Zgodność: ${d.correct}/${d.total} poprawnych`;
+                document.getElementById('rel-xp-fill').style.width = (d.xp / (d.level * 300) * 100) + "%";
+                
+                // Rysuj kropki postępu
+                const dots = document.getElementById('q-dots'); dots.innerHTML = "";
+                for(let i=0; i<QUESTIONS_PER_ROUND; i++) {
+                    const dot = document.createElement('span');
+                    dot.className = `q-circle ${i < d.currentQIdx ? 'q-done' : (i === d.currentQIdx ? 'q-active' : '')}`;
+                    dots.appendChild(dot);
+                }
 
-                const q = QUESTIONS[d.currentQ];
-                const optArea = document.getElementById('options-area');
-                optArea.innerHTML = "";
+                const q = QUESTIONS[d.qPack[d.currentQIdx]];
+                const optArea = document.getElementById('options-area'); optArea.innerHTML = "";
 
                 if(d.turn === currentUser) {
                     document.getElementById('q-text').innerText = q.q;
-                    document.getElementById('game-status').innerText = d.step === "ASKING" ? "Pytanie o Ciebie:" : `Co wybrał partner (${partner})?`;
-                    
+                    document.getElementById('game-status').innerText = d.step === "ASKING" ? "Odpowiedz o sobie" : `Co wybrał ${partner}?`;
                     q.o.forEach(opt => {
-                        const b = document.createElement('button');
-                        b.className = "btn-opt";
-                        b.innerText = opt;
-                        b.onclick = () => handleAction(relId, d, opt, partner);
+                        const b = document.createElement('button'); b.className = "btn-opt"; b.innerText = opt;
+                        b.onclick = () => handleMove(relId, d, opt, partner);
                         optArea.appendChild(b);
                     });
                 } else {
-                    document.getElementById('q-text').innerText = "Czekamy na ruch...";
-                    document.getElementById('game-status').innerText = `Teraz kolej użytkownika ${partner}`;
+                    document.getElementById('q-text').innerText = "Czekaj na ruch...";
+                    document.getElementById('game-status').innerText = `Kolej użytkownika ${partner}`;
                 }
             });
         }
 
-        function handleAction(relId, data, val, partner) {
-            const ref = db.ref('evo_v2/relations/' + relId);
-            
+        function handleMove(relId, data, val, partner) {
+            const ref = db.ref('evo_v3/relations/'+relId);
+            let updates = {};
+
             if(data.step === "ASKING") {
-                // Ja odpowiadam o sobie, tura przechodzi na partnera by zgadł
-                ref.update({
-                    lastAns: val,
-                    step: "GUESSING",
-                    turn: partner
-                });
+                let ans = data.answers || [];
+                ans.push(val);
+                if(ans.length >= QUESTIONS_PER_ROUND) {
+                    updates = { answers: ans, step: "GUESSING", currentQIdx: 0, turn: partner };
+                } else {
+                    updates = { answers: ans, currentQIdx: data.currentQIdx + 1 };
+                }
             } else {
-                // Ja zgaduję co wybrał partner
-                const match = (data.lastAns === val);
-                let xp = data.xp + (match ? 60 : 15);
-                let lvl = data.level;
-                if(xp >= lvl * 200) { xp = 0; lvl++; }
+                // Zgadywanie
+                const correctAns = data.answers[data.currentQIdx];
+                const match = (val === correctAns);
+                
+                let newCorrect = data.correct + (match ? 1 : 0);
+                let newTotal = data.total + 1;
+                let newXP = data.xp + (match ? 100 : 20);
+                let newLvl = data.level;
+                if(newXP >= data.level * 300) { newXP = 0; newLvl++; }
 
-                ref.update({
-                    xp: xp,
-                    level: lvl,
-                    correct: data.correct + (match ? 1 : 0),
-                    total: data.total + 1,
-                    currentQ: Math.floor(Math.random() * QUESTIONS.length),
-                    step: "ASKING",
-                    turn: partner // Teraz partner odpowiada o sobie
-                });
-                alert(match ? "TRAFIONE! +60 XP ✨" : "PUDŁO! Ale i tak dostajecie +15 XP za próbę. 🙃");
+                if(data.currentQIdx + 1 >= QUESTIONS_PER_ROUND) {
+                    // Koniec paczki - zamiana ról na "odpowiadanie"
+                    updates = {
+                        correct: newCorrect, total: newTotal, xp: newXP, level: newLvl,
+                        answers: [], currentQIdx: 0, qPack: generatePack(),
+                        step: "ASKING", turn: currentUser // Teraz ja odpowiadam o sobie
+                    };
+                    alert("Runda zakończona! Wyniki zaktualizowane.");
+                } else {
+                    updates = {
+                        correct: newCorrect, total: newTotal, xp: newXP, level: newLvl,
+                        currentQIdx: data.currentQIdx + 1
+                    };
+                }
             }
+            ref.update(updates);
         }
 
-        function hideAll() {
-            document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
-        }
-
-        // Auto-login
-        const saved = localStorage.getItem('theTest_v2_nick');
+        function hideAll() { document.querySelectorAll('.card').forEach(c => c.classList.add('hidden')); }
+        const saved = localStorage.getItem('test_v3_nick');
         if(saved) { currentUser = saved; showMenu(); }
     </script>
 </body>
