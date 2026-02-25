@@ -6,173 +6,243 @@
     <title>Gierki by Kamil 🧬</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0f172a;
-            --card: #1e293b;
+            --bg: #080b14;
+            --card: rgba(30, 41, 59, 0.7);
             --accent: #38bdf8;
             --text: #f1f5f9;
+            --success: #10b981;
+            --xp: #fbbf24;
         }
+
         body {
-            background: var(--bg);
-            font-family: 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at top right, #1e1b4b, #080b14);
+            font-family: 'Outfit', sans-serif;
             color: var(--text);
             margin: 0;
             display: flex;
             justify-content: center;
             min-height: 100vh;
         }
-        .container { width: 95%; max-width: 450px; padding: 20px; text-align: center; }
-        
-        /* Ekran Główny */
-        .header-title { font-size: 3rem; font-weight: 800; margin-bottom: 0; }
-        .header-subtitle { font-size: 1.2rem; color: var(--accent); margin-top: -5px; margin-bottom: 40px; opacity: 0.8; }
-        
-        .main-btn {
+
+        .container { width: 100%; max-width: 450px; padding: 20px; }
+
+        /* Launcher Styles */
+        .launcher-header { text-align: center; margin-bottom: 40px; }
+        .launcher-header h1 { font-size: 3.5rem; margin: 0; font-weight: 800; letter-spacing: -2px; }
+        .launcher-header p { color: var(--accent); margin: 0; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* Cards */
+        .card {
             background: var(--card);
-            border: 2px solid #334155;
+            backdrop-filter: blur(10px);
             padding: 30px;
+            border-radius: 32px;
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        /* Buttons */
+        .main-btn {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 25px;
             border-radius: 24px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             cursor: pointer;
             transition: 0.3s;
+            text-align: left;
             display: block;
             width: 100%;
+            color: white;
+            text-decoration: none;
         }
-        .main-btn:hover { border-color: var(--accent); transform: translateY(-5px); }
-        .main-btn h2 { margin: 0; font-size: 1.8rem; }
-        .main-btn p { margin: 5px 0 0 0; font-size: 0.9rem; color: #94a3b8; }
+        .main-btn:hover { border-color: var(--accent); background: rgba(56, 189, 248, 0.1); transform: translateY(-3px); }
+        .main-btn h2 { margin: 0; font-size: 1.5rem; }
+        .main-btn p { margin: 5px 0 0 0; font-size: 0.85rem; color: #94a3b8; }
 
-        /* Karty i Logowanie */
-        .card { background: var(--card); padding: 25px; border-radius: 24px; border: 1px solid #334155; }
+        button.action-btn {
+            width: 100%; padding: 16px; border-radius: 16px; border: none;
+            font-weight: bold; background: var(--accent); color: #080b14;
+            cursor: pointer; margin-top: 10px; font-size: 1rem;
+        }
+
+        .back-link { color: #64748b; cursor: pointer; display: block; margin-top: 20px; font-size: 0.9rem; }
+
+        /* Game Elements */
         .hidden { display: none !important; }
+        input {
+            width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1); background: #0f172a; color: white; box-sizing: border-box;
+        }
 
-        input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
-        button.action-btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; background: var(--accent); color: #0f172a; cursor: pointer; margin-top: 10px; }
-        
-        .back-btn { background: none; border: none; color: #94a3b8; cursor: pointer; margin-top: 20px; text-decoration: underline; }
+        .mode-select { display: flex; gap: 10px; margin: 15px 0; }
+        .mode-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--accent); background: none; color: white; cursor: pointer; }
+        .mode-btn.active { background: var(--accent); color: #080b14; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        
-        <div id="screen-launcher">
-            <h1 class="header-title">Gierki</h1>
-            <p class="header-subtitle">by Kamil</p>
-
-            <div class="main-btn" onclick="showImpostorMenu()">
-                <h2>🕵️‍♂️ Impostor</h2>
-                <p>Szybka gra imprezowa (brak kont)</p>
-            </div>
-
-            <div class="main-btn" onclick="showTestMenu()">
-                <h2>🧬 The Test</h2>
-                <p>Ewolucja relacji (wymaga logowania)</p>
-            </div>
+<div class="container">
+    
+    <div id="screen-launcher">
+        <div class="launcher-header">
+            <h1>Gierki</h1>
+            <p>by Kamil</p>
         </div>
 
-        <div id="screen-impostor-auth" class="card hidden">
-            <h2>Tryb Impostor</h2>
-            <input type="text" id="imp-nick" placeholder="Twój Nick">
-            <input type="text" id="imp-room" placeholder="Kod pokoju">
-            <button class="action-btn" onclick="alert('Tu wstawimy Twoją starą logikę Impostora')">STWÓRZ POKÓJ</button>
-            <button class="action-btn" style="background: #94a3b8;" onclick="alert('Tu dołączanie do Impostora')">DOŁĄCZ</button>
-            <button class="back-btn" onclick="goBack()">← Wróć do wyboru gier</button>
-        </div>
+        <button class="main-btn" onclick="openImpostor()">
+            <h2>🕵️‍♂️ Impostor</h2>
+            <p>Znajdź zdrajcę! Tryb haseł lub pytań.</p>
+        </button>
 
-        <div id="screen-test-auth" class="card hidden">
-            <h2>Logowanie: The Test</h2>
-            <p>Twoje postępy są zapisywane na koncie.</p>
-            <input type="text" id="test-nick" placeholder="Nick">
-            <input type="password" id="test-pin" placeholder="PIN (4 cyfry)">
-            <button class="action-btn" onclick="handleTestLogin()">ZALOGUJ / STWÓRZ</button>
-            <button class="back-btn" onclick="goBack()">← Wróć do wyboru gier</button>
-        </div>
-
-        <div id="screen-test-main" class="card hidden">
-            <h2 id="welcome-msg">Witaj!</h2>
-            <p>Tu będzie lista Twoich relacji i statystyki...</p>
-            <button class="back-btn" onclick="logoutTest()">Wyloguj</button>
-        </div>
-
+        <button class="main-btn" onclick="openTest()">
+            <h2>🧬 The Test</h2>
+            <p>Sprawdź swoją synchronizację z innymi.</p>
+        </button>
     </div>
 
-    <script>
-        // --- KONFIGURACJA FIREBASE ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyAQLLZui2v4j3nLLKXhp2brcqsgSyy0W2s",
-            databaseURL: "https://menu-gier-default-rtdb.europe-west1.firebasedatabase.app",
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    <div id="screen-impostor-auth" class="card hidden">
+        <h2>Tryb Impostor</h2>
+        <input type="text" id="imp-nick" placeholder="Twoje imię">
+        <input type="text" id="imp-room" placeholder="Kod pokoju">
+        
+        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 5px;">Wybierz tryb gry:</p>
+        <div class="mode-select">
+            <button class="mode-btn active" id="mode-words" onclick="setImpMode('words')">Hasła</button>
+            <button class="mode-btn" id="mode-questions" onclick="setImpMode('questions')">Pytania</button>
+        </div>
 
-        // --- NAWIGACJA ---
-        function showImpostorMenu() {
-            hideAll();
-            document.getElementById('screen-impostor-auth').classList.remove('hidden');
+        <button class="action-btn" onclick="startImpostor(true)">STWÓRZ POKÓJ</button>
+        <button class="action-btn" style="background: #334155; color: white;" onclick="startImpostor(false)">DOŁĄCZ</button>
+        <span class="back-link" onclick="showLauncher()">← Powrót do Gierki by Kamil</span>
+    </div>
+
+    <div id="screen-test-auth" class="card hidden">
+        <h2>Logowanie: The Test</h2>
+        <input type="text" id="test-nick" placeholder="Twoje imię">
+        <input type="password" id="test-pin" placeholder="PIN (4 cyfry)">
+        <button class="action-btn" onclick="handleTestLogin()">ZALOGUJ / STWÓRZ</button>
+        <span class="back-link" onclick="showLauncher()">← Powrót do Gierki by Kamil</span>
+    </div>
+
+    <div id="screen-test-main" class="card hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 id="welcome-user" style="margin:0">Cześć!</h3>
+            <span style="font-size: 0.7rem; color: var(--accent); cursor:pointer" onclick="showLauncher()">MENU GIER</span>
+        </div>
+        
+        <div id="test-games-list"></div>
+        
+        <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+            <input type="text" id="target-nick" placeholder="Nick partnera">
+            <button class="action-btn" onclick="startNewTestRelation()">ROZPOCZNIJ NOWĄ RELACJĘ</button>
+            <button class="back-link" style="margin: 15px auto;" onclick="logoutTest()">Wyloguj się</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Konfiguracja Firebase (używamy tej samej bazy)
+    const firebaseConfig = {
+        apiKey: "AIzaSyAQLLZui2v4j3nLLKXhp2brcqsgSyy0W2s",
+        databaseURL: "https://menu-gier-default-rtdb.europe-west1.firebasedatabase.app",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let currentApp = null; // 'impostor' lub 'test'
+    let impMode = 'words';
+
+    // --- NAWIGACJA ---
+    function showLauncher() {
+        hideAll();
+        document.getElementById('screen-launcher').classList.remove('hidden');
+    }
+
+    function openImpostor() {
+        hideAll();
+        document.getElementById('screen-impostor-auth').classList.remove('hidden');
+    }
+
+    function setImpMode(mode) {
+        impMode = mode;
+        document.getElementById('mode-words').classList.toggle('active', mode === 'words');
+        document.getElementById('mode-questions').classList.toggle('active', mode === 'questions');
+    }
+
+    function openTest() {
+        hideAll();
+        const saved = localStorage.getItem('test_v5_nick');
+        if(saved) {
+            enterTestDashboard(saved);
+        } else {
+            document.getElementById('screen-test-auth').classList.remove('hidden');
         }
+    }
 
-        function showTestMenu() {
-            hideAll();
-            // Sprawdź czy już zalogowany w localStorage
-            const savedNick = localStorage.getItem('test_nick');
-            if(savedNick) {
-                showTestDashboard(savedNick);
-            } else {
-                document.getElementById('screen-test-auth').classList.remove('hidden');
-            }
-        }
+    function hideAll() {
+        document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+    }
 
-        function goBack() {
-            hideAll();
-            document.getElementById('screen-launcher').classList.remove('hidden');
-        }
+    // --- LOGIKA IMPOSTOR (Szkielet) ---
+    function startImpostor(isHost) {
+        const nick = document.getElementById('imp-nick').value;
+        const room = document.getElementById('imp-room').value;
+        if(!nick || !room) return alert("Uzupełnij dane!");
+        alert(`Uruchamianie Impostora w trybie: ${impMode}\nPokój: ${room}\n(Tu wstawiamy Twój kod gry Impostor)`);
+        // Tutaj wklejasz funkcję startującą Twoją starą grę
+    }
 
-        function hideAll() {
-            document.getElementById('screen-launcher').classList.add('hidden');
-            document.getElementById('screen-impostor-auth').classList.add('hidden');
-            document.getElementById('screen-test-auth').classList.add('hidden');
-            document.getElementById('screen-test-main').classList.add('hidden');
-        }
+    // --- LOGIKA THE TEST (Pełna) ---
+    function handleTestLogin() {
+        const nick = document.getElementById('test-nick').value.trim();
+        const pin = document.getElementById('test-pin').value.trim();
+        if(!nick || pin.length < 4) return alert("Nick i 4-cyfrowy PIN!");
 
-        // --- LOGIKA THE TEST ---
-        function handleTestLogin() {
-            const nick = document.getElementById('test-nick').value.trim();
-            const pin = document.getElementById('test-pin').value.trim();
-            
-            if(!nick || pin.length < 4) return alert("Podaj nick i 4-cyfrowy PIN");
+        db.ref('evo_v5/users/'+nick).once('value', snap => {
+            if(snap.exists() && snap.val().pin !== pin) return alert("Zły PIN!");
+            if(!snap.exists()) db.ref('evo_v5/users/'+nick).set({nick, pin});
+            localStorage.setItem('test_v5_nick', nick);
+            enterTestDashboard(nick);
+        });
+    }
 
-            db.ref('evo_v5/users/' + nick).once('value', snap => {
-                if(snap.exists()) {
-                    if(snap.val().pin === pin) {
-                        loginSuccess(nick);
-                    } else {
-                        alert("Błędny PIN!");
-                    }
-                } else {
-                    // Tworzenie nowego konta
-                    db.ref('evo_v5/users/' + nick).set({ nick, pin }).then(() => loginSuccess(nick));
+    function enterTestDashboard(nick) {
+        hideAll();
+        document.getElementById('screen-test-main').classList.remove('hidden');
+        document.getElementById('welcome-user').innerText = "Cześć, " + nick;
+        loadTestGames(nick);
+    }
+
+    function loadTestGames(nick) {
+        db.ref('evo_v5/relations').on('value', snap => {
+            const list = document.getElementById('test-games-list');
+            list.innerHTML = "";
+            const data = snap.val() || {};
+            Object.keys(data).forEach(id => {
+                if(id.includes(nick)) {
+                    const partner = id.replace(nick, "").replace("_", "");
+                    const isMyTurn = data[id].turn === nick;
+                    const div = document.createElement('div');
+                    div.style.cssText = "background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; margin-bottom:10px; cursor:pointer; text-align:left; border:1px solid rgba(255,255,255,0.1)";
+                    div.innerHTML = `<strong>${partner}</strong> ${isMyTurn ? '<span style="float:right; color:var(--success)">TWOJA KOLEJ</span>' : ''}`;
+                    div.onclick = () => alert("Uruchamianie relacji z " + partner);
+                    list.appendChild(div);
                 }
             });
-        }
+        });
+    }
 
-        function loginSuccess(nick) {
-            localStorage.setItem('test_nick', nick);
-            showTestDashboard(nick);
-        }
+    function logoutTest() {
+        localStorage.removeItem('test_v5_nick');
+        showLauncher();
+    }
+</script>
 
-        function showTestDashboard(nick) {
-            hideAll();
-            document.getElementById('screen-test-main').classList.remove('hidden');
-            document.getElementById('welcome-msg').innerText = "Witaj, " + nick;
-            // Tu docelowo wkleimy całą listę gier z poprzedniego kodu
-        }
-
-        function logoutTest() {
-            localStorage.removeItem('test_nick');
-            goBack();
-        }
-    </script>
 </body>
 </html>
