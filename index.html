@@ -9,145 +9,138 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #080b14;
-            --card: rgba(30, 41, 59, 0.7);
-            --accent: #38bdf8;
-            --text: #f1f5f9;
-            --success: #10b981;
-            --xp: #fbbf24;
+            --bg: #080b14; --card: rgba(30, 41, 59, 0.7); --accent: #38bdf8;
+            --text: #f1f5f9; --success: #10b981; --danger: #f43f5e; --xp: #fbbf24;
         }
-
         body {
             background: radial-gradient(circle at top right, #1e1b4b, #080b14);
-            font-family: 'Outfit', sans-serif;
-            color: var(--text);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
+            font-family: 'Outfit', sans-serif; color: var(--text); margin: 0;
+            display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden;
         }
-
         .container { width: 100%; max-width: 450px; padding: 20px; }
-
-        /* Launcher Styles */
-        .launcher-header { text-align: center; margin-bottom: 40px; }
-        .launcher-header h1 { font-size: 3.5rem; margin: 0; font-weight: 800; letter-spacing: -2px; }
-        .launcher-header p { color: var(--accent); margin: 0; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; }
-
-        /* Cards */
         .card {
-            background: var(--card);
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            border-radius: 32px;
-            border: 1px solid rgba(255,255,255,0.1);
-            text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            background: var(--card); backdrop-filter: blur(10px); padding: 30px;
+            border-radius: 32px; border: 1px solid rgba(255,255,255,0.1);
+            text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
-
-        /* Buttons */
-        .main-btn {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 25px;
-            border-radius: 24px;
-            margin-bottom: 15px;
-            cursor: pointer;
-            transition: 0.3s;
-            text-align: left;
-            display: block;
-            width: 100%;
-            color: white;
-            text-decoration: none;
-        }
-        .main-btn:hover { border-color: var(--accent); background: rgba(56, 189, 248, 0.1); transform: translateY(-3px); }
-        .main-btn h2 { margin: 0; font-size: 1.5rem; }
-        .main-btn p { margin: 5px 0 0 0; font-size: 0.85rem; color: #94a3b8; }
-
-        button.action-btn {
-            width: 100%; padding: 16px; border-radius: 16px; border: none;
-            font-weight: bold; background: var(--accent); color: #080b14;
-            cursor: pointer; margin-top: 10px; font-size: 1rem;
-        }
-
-        .back-link { color: #64748b; cursor: pointer; display: block; margin-top: 20px; font-size: 0.9rem; }
-
-        /* Game Elements */
         .hidden { display: none !important; }
+        
+        /* UI Elements */
+        h1 { font-size: 3rem; margin: 0; font-weight: 800; }
+        .subtitle { color: var(--accent); text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem; margin-bottom: 30px; }
         input {
             width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.1); background: #0f172a; color: white; box-sizing: border-box;
         }
+        button.action-btn {
+            width: 100%; padding: 16px; border-radius: 16px; border: none;
+            font-weight: bold; background: var(--accent); color: #080b14; cursor: pointer; margin-top: 10px;
+        }
+        .main-btn {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+            padding: 25px; border-radius: 24px; margin-bottom: 15px; cursor: pointer;
+            width: 100%; color: white; text-align: left;
+        }
+        .main-btn:hover { border-color: var(--accent); background: rgba(56, 189, 248, 0.1); }
 
+        /* Game Specifics */
         .mode-select { display: flex; gap: 10px; margin: 15px 0; }
         .mode-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--accent); background: none; color: white; cursor: pointer; }
         .mode-btn.active { background: var(--accent); color: #080b14; }
+        .xp-bar { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; margin: 10px 0; overflow: hidden; }
+        .xp-fill { height: 100%; background: var(--xp); transition: width 0.5s; }
+        .reveal-item { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 15px; margin-top: 8px; text-align: left; border-left: 4px solid #444; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    
     <div id="screen-launcher">
-        <div class="launcher-header">
+        <center>
             <h1>Gierki</h1>
-            <p>by Kamil</p>
-        </div>
-
-        <button class="main-btn" onclick="openImpostor()">
+            <p class="subtitle">by Kamil</p>
+        </center>
+        <button class="main-btn" onclick="nav('screen-impostor-auth')">
             <h2>🕵️‍♂️ Impostor</h2>
-            <p>Znajdź zdrajcę! Tryb haseł lub pytań.</p>
+            <p>Hasła lub pytania. Znajdź zdrajcę.</p>
         </button>
-
-        <button class="main-btn" onclick="openTest()">
+        <button class="main-btn" onclick="handleTestAutoLogin()">
             <h2>🧬 The Test</h2>
-            <p>Sprawdź swoją synchronizację z innymi.</p>
+            <p>Sprawdź dopasowanie w relacji.</p>
         </button>
     </div>
 
     <div id="screen-impostor-auth" class="card hidden">
-        <h2>Tryb Impostor</h2>
-        <input type="text" id="imp-nick" placeholder="Twoje imię">
+        <h2>Impostor</h2>
+        <input type="text" id="imp-nick" placeholder="Twój Nick">
         <input type="text" id="imp-room" placeholder="Kod pokoju">
-        
-        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 5px;">Wybierz tryb gry:</p>
         <div class="mode-select">
-            <button class="mode-btn active" id="mode-words" onclick="setImpMode('words')">Hasła</button>
-            <button class="mode-btn" id="mode-questions" onclick="setImpMode('questions')">Pytania</button>
+            <button class="mode-btn active" id="btn-m-w" onclick="setImpMode('words')">Hasła</button>
+            <button class="mode-btn" id="btn-m-q" onclick="setImpMode('questions')">Pytania</button>
         </div>
+        <button class="action-btn" onclick="startImpostor(true)">STWÓRZ</button>
+        <button class="action-btn" style="background:#334155; color:white;" onclick="startImpostor(false)">DOŁĄCZ</button>
+        <p onclick="nav('screen-launcher')" style="cursor:pointer; opacity:0.6; margin-top:20px;">← Powrót</p>
+    </div>
 
-        <button class="action-btn" onclick="startImpostor(true)">STWÓRZ POKÓJ</button>
-        <button class="action-btn" style="background: #334155; color: white;" onclick="startImpostor(false)">DOŁĄCZ</button>
-        <span class="back-link" onclick="showLauncher()">← Powrót do Gierki by Kamil</span>
+    <div id="screen-impostor-game" class="card hidden">
+        <h3 id="imp-display-room">Pokój: -</h3>
+        <div id="imp-waiting">
+            <p>Oczekiwanie na graczy...</p>
+            <div id="imp-players"></div>
+            <button class="action-btn" id="imp-start-btn" onclick="revealRoles()" style="display:none">START</button>
+        </div>
+        <div id="imp-role-card" class="hidden">
+            <h2 id="role-title">Twoja rola</h2>
+            <div id="role-value" style="font-size: 1.5rem; color: var(--accent); margin: 20px 0;"></div>
+            <p id="role-desc"></p>
+        </div>
+        <button class="action-btn" style="background:#551a1a; color:white;" onclick="leaveImpostor()">Opuść grę</button>
     </div>
 
     <div id="screen-test-auth" class="card hidden">
-        <h2>Logowanie: The Test</h2>
-        <input type="text" id="test-nick" placeholder="Twoje imię">
+        <h2>The Test: Logowanie</h2>
+        <input type="text" id="test-nick" placeholder="Nick">
         <input type="password" id="test-pin" placeholder="PIN (4 cyfry)">
-        <button class="action-btn" onclick="handleTestLogin()">ZALOGUJ / STWÓRZ</button>
-        <span class="back-link" onclick="showLauncher()">← Powrót do Gierki by Kamil</span>
+        <button class="action-btn" onclick="testLogin()">WEJDŹ</button>
+        <p onclick="nav('screen-launcher')" style="cursor:pointer; opacity:0.6; margin-top:20px;">← Powrót</p>
     </div>
 
-    <div id="screen-test-main" class="card hidden">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 id="welcome-user" style="margin:0">Cześć!</h3>
-            <span style="font-size: 0.7rem; color: var(--accent); cursor:pointer" onclick="showLauncher()">MENU GIER</span>
+    <div id="screen-test-dash" class="card hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 id="test-user-name">Cześć!</h3>
+            <span onclick="nav('screen-launcher')" style="color:var(--accent); font-size:0.8rem; cursor:pointer">LOBBY GIER</span>
         </div>
-        
-        <div id="test-games-list"></div>
-        
-        <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-            <input type="text" id="target-nick" placeholder="Nick partnera">
-            <button class="action-btn" onclick="startNewTestRelation()">ROZPOCZNIJ NOWĄ RELACJĘ</button>
-            <button class="back-link" style="margin: 15px auto;" onclick="logoutTest()">Wyloguj się</button>
-        </div>
+        <div id="test-list" style="margin: 20px 0;"></div>
+        <input type="text" id="test-target" placeholder="Nick partnera">
+        <button class="action-btn" onclick="newTestRel()">NOWA GRA</button>
+        <p onclick="testLogout()" style="cursor:pointer; opacity:0.5; font-size:0.8rem; margin-top:15px;">Wyloguj</p>
     </div>
 
+    <div id="screen-test-play" class="card hidden">
+        <div id="test-stat-bar">
+            <div id="test-lvl" class="subtitle" style="margin-bottom:5px">LVL 1</div>
+            <div class="xp-bar"><div id="test-xp-f" class="xp-fill"></div></div>
+        </div>
+        <div id="test-dots" style="display:flex; justify-content:center; gap:5px; margin:15px 0;"></div>
+        <h2 id="test-q">Pytanie?</h2>
+        <div id="test-options"></div>
+        <div id="test-history" class="hidden" style="border-top:1px solid #334155; margin-top:20px; padding-top:10px;">
+            <small style="opacity:0.5">Ostatnia runda:</small>
+            <div id="test-hist-list"></div>
+        </div>
+        <button class="action-btn" style="background:#334155; color:white; margin-top:20px;" onclick="nav('screen-test-dash')">WRÓĆ</button>
+    </div>
+
+    <div id="screen-test-reveal" class="card hidden">
+        <h2>Wyniki Serii!</h2>
+        <div id="test-rev-list"></div>
+        <button class="action-btn" onclick="testConfirmReveal()">KONTYNUUJ</button>
+    </div>
 </div>
 
 <script>
-    // Konfiguracja Firebase (używamy tej samej bazy)
+    // --- FIREBASE ---
     const firebaseConfig = {
         apiKey: "AIzaSyAQLLZui2v4j3nLLKXhp2brcqsgSyy0W2s",
         databaseURL: "https://menu-gier-default-rtdb.europe-west1.firebasedatabase.app",
@@ -155,94 +148,226 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let currentApp = null; // 'impostor' lub 'test'
-    let impMode = 'words';
+    // --- STATE ---
+    let myNick = "";
+    let activeRoom = "";
+    let currentImpMode = "words";
+    let activeTestRelId = "";
 
-    // --- NAWIGACJA ---
-    function showLauncher() {
-        hideAll();
-        document.getElementById('screen-launcher').classList.remove('hidden');
+    // --- NAVIGATION ---
+    function nav(id) {
+        document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
     }
 
-    function openImpostor() {
-        hideAll();
-        document.getElementById('screen-impostor-auth').classList.remove('hidden');
+    // --- IMPOSTOR LOGIC ---
+    const WORDS = ["Pizza", "Kino", "Paryż", "Kot", "Telefon", "Szkoła", "Wakacje"];
+    const QUES = ["Ulubione jedzenie?", "Gdzie na wakacje?", "Co robisz rano?", "Twoje hobby?"];
+
+    function setImpMode(m) {
+        currentImpMode = m;
+        document.getElementById('btn-m-w').classList.toggle('active', m==='words');
+        document.getElementById('btn-m-q').classList.toggle('active', m==='questions');
     }
 
-    function setImpMode(mode) {
-        impMode = mode;
-        document.getElementById('mode-words').classList.toggle('active', mode === 'words');
-        document.getElementById('mode-questions').classList.toggle('active', mode === 'questions');
-    }
-
-    function openTest() {
-        hideAll();
-        const saved = localStorage.getItem('test_v5_nick');
-        if(saved) {
-            enterTestDashboard(saved);
-        } else {
-            document.getElementById('screen-test-auth').classList.remove('hidden');
-        }
-    }
-
-    function hideAll() {
-        document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
-    }
-
-    // --- LOGIKA IMPOSTOR (Szkielet) ---
     function startImpostor(isHost) {
-        const nick = document.getElementById('imp-nick').value;
-        const room = document.getElementById('imp-room').value;
-        if(!nick || !room) return alert("Uzupełnij dane!");
-        alert(`Uruchamianie Impostora w trybie: ${impMode}\nPokój: ${room}\n(Tu wstawiamy Twój kod gry Impostor)`);
-        // Tutaj wklejasz funkcję startującą Twoją starą grę
+        myNick = document.getElementById('imp-nick').value.trim();
+        activeRoom = document.getElementById('imp-room').value.trim();
+        if(!myNick || !activeRoom) return alert("Uzupełnij dane!");
+
+        const ref = db.ref('impostor/'+activeRoom);
+        if(isHost) {
+            ref.set({
+                host: myNick,
+                mode: currentImpMode,
+                state: 'waiting',
+                secret: currentImpMode === 'words' ? WORDS[Math.floor(Math.random()*WORDS.length)] : QUES[Math.floor(Math.random()*QUES.length)]
+            });
+        }
+        ref.child('players/'+myNick).set(true);
+        listenImpostor();
+        nav('screen-impostor-game');
     }
 
-    // --- LOGIKA THE TEST (Pełna) ---
-    function handleTestLogin() {
-        const nick = document.getElementById('test-nick').value.trim();
-        const pin = document.getElementById('test-pin').value.trim();
-        if(!nick || pin.length < 4) return alert("Nick i 4-cyfrowy PIN!");
+    function listenImpostor() {
+        db.ref('impostor/'+activeRoom).on('value', snap => {
+            const data = snap.val();
+            if(!data) return;
+            document.getElementById('imp-display-room').innerText = "Pokój: " + activeRoom;
+            
+            // Player list
+            const pDiv = document.getElementById('imp-players');
+            pDiv.innerHTML = Object.keys(data.players || {}).map(p => `<div>${p}</div>`).join('');
+            
+            if(data.host === myNick) document.getElementById('imp-start-btn').style.display = 'block';
 
-        db.ref('evo_v5/users/'+nick).once('value', snap => {
-            if(snap.exists() && snap.val().pin !== pin) return alert("Zły PIN!");
-            if(!snap.exists()) db.ref('evo_v5/users/'+nick).set({nick, pin});
-            localStorage.setItem('test_v5_nick', nick);
-            enterTestDashboard(nick);
+            if(data.state === 'revealed') {
+                document.getElementById('imp-waiting').classList.add('hidden');
+                document.getElementById('imp-role-card').classList.remove('hidden');
+                const isImp = data.impostor === myNick;
+                document.getElementById('role-title').innerText = isImp ? "JESTEŚ IMPOSTOREM" : "JESTEŚ GRACZEM";
+                document.getElementById('role-value').innerText = isImp ? "???" : data.secret;
+                document.getElementById('role-desc').innerText = isImp ? "Musisz udawać, że znasz hasło/pytanie!" : "Opisz to hasło innym.";
+            }
         });
     }
 
-    function enterTestDashboard(nick) {
-        hideAll();
-        document.getElementById('screen-test-main').classList.remove('hidden');
-        document.getElementById('welcome-user').innerText = "Cześć, " + nick;
-        loadTestGames(nick);
+    function revealRoles() {
+        const ref = db.ref('impostor/'+activeRoom);
+        ref.once('value', snap => {
+            const players = Object.keys(snap.val().players);
+            const imp = players[Math.floor(Math.random()*players.length)];
+            ref.update({ state: 'revealed', impostor: imp });
+        });
     }
 
-    function loadTestGames(nick) {
-        db.ref('evo_v5/relations').on('value', snap => {
-            const list = document.getElementById('test-games-list');
+    function leaveImpostor() {
+        db.ref('impostor/'+activeRoom).off();
+        nav('screen-launcher');
+    }
+
+    // --- THE TEST LOGIC ---
+    const TEST_QUESTIONS = [
+        { q: "Twoje wymarzone wakacje?", o: ["Góry", "Morze", "Miasto"] },
+        { q: "Ulubiona pora dnia?", o: ["Rano", "Popołudnie", "Wieczór/Noc"] },
+        { q: "Kto częściej sprząta?", o: ["Ja", "Ty", "Zatrudnimy kogoś"] },
+        { q: "Wolisz dostawać...", o: ["Prezenty", "Czas razem", "Komplementy"] }
+    ];
+
+    function handleTestAutoLogin() {
+        const saved = localStorage.getItem('kamil_test_nick');
+        if(saved) { myNick = saved; enterTestDash(); }
+        else nav('screen-test-auth');
+    }
+
+    function testLogin() {
+        myNick = document.getElementById('test-nick').value.trim();
+        const pin = document.getElementById('test-pin').value.trim();
+        if(!myNick || pin.length < 4) return alert("Nick i PIN!");
+        db.ref('test_v6/users/'+myNick).once('value', s => {
+            if(s.exists() && s.val().pin !== pin) return alert("Zły PIN");
+            if(!s.exists()) db.ref('test_v6/users/'+myNick).set({nick:myNick, pin:pin});
+            localStorage.setItem('kamil_test_nick', myNick);
+            enterTestDash();
+        });
+    }
+
+    function enterTestDash() {
+        nav('screen-test-dash');
+        document.getElementById('test-user-name').innerText = "Cześć, " + myNick;
+        db.ref('test_v6/rels').on('value', s => {
+            const list = document.getElementById('test-list');
             list.innerHTML = "";
-            const data = snap.val() || {};
+            const data = s.val() || {};
             Object.keys(data).forEach(id => {
-                if(id.includes(nick)) {
-                    const partner = id.replace(nick, "").replace("_", "");
-                    const isMyTurn = data[id].turn === nick;
-                    const div = document.createElement('div');
-                    div.style.cssText = "background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; margin-bottom:10px; cursor:pointer; text-align:left; border:1px solid rgba(255,255,255,0.1)";
-                    div.innerHTML = `<strong>${partner}</strong> ${isMyTurn ? '<span style="float:right; color:var(--success)">TWOJA KOLEJ</span>' : ''}`;
-                    div.onclick = () => alert("Uruchamianie relacji z " + partner);
-                    list.appendChild(div);
+                if(id.includes(myNick)) {
+                    const partner = id.replace(myNick,"").replace("_","");
+                    const turn = data[id].turn === myNick;
+                    const d = document.createElement('div');
+                    d.className = "main-btn";
+                    d.innerHTML = `<strong>${partner}</strong> ${turn?'<span style="float:right;color:var(--success)">TWÓJ RUCH</span>':''}`;
+                    d.onclick = () => openTestGame(id, partner);
+                    list.appendChild(d);
                 }
             });
         });
     }
 
-    function logoutTest() {
-        localStorage.removeItem('test_v5_nick');
-        showLauncher();
+    function newTestRel() {
+        const target = document.getElementById('test-target').value.trim();
+        if(!target || target === myNick) return;
+        const id = [myNick, target].sort().join("_");
+        db.ref('test_v6/rels/'+id).set({
+            level: 1, xp: 0, turn: myNick, step: 'ASKING',
+            idx: 0, pack: [0,1,2], ans: [], gus: [], correct: 0, total: 0
+        });
     }
-</script>
 
+    function openTestGame(id, partner) {
+        activeTestRelId = id;
+        nav('screen-test-play');
+        db.ref('test_v6/rels/'+id).on('value', s => {
+            const d = s.val(); if(!d || activeTestRelId !== id) return;
+            if(d.step === 'REVEAL' && d.turn === myNick) { showTestReveal(d, partner); return; }
+
+            document.getElementById('test-lvl').innerText = "POZIOM " + d.level;
+            document.getElementById('test-xp-f').style.width = (d.xp/(d.level*300)*100)+"%";
+            
+            const dots = document.getElementById('test-dots'); dots.innerHTML = "";
+            for(let i=0; i<3; i++) {
+                const dot = document.createElement('div');
+                dot.style.cssText = `width:30px; height:5px; border-radius:5px; background:${i < d.idx ? 'var(--success)' : (i===d.idx?'var(--accent)':'#334155')}`;
+                dots.appendChild(dot);
+            }
+
+            const qArea = document.getElementById('test-options'); qArea.innerHTML = "";
+            if(d.turn === myNick) {
+                const qObj = TEST_QUESTIONS[d.pack[d.idx]];
+                document.getElementById('test-q').innerText = qObj.q;
+                qObj.o.forEach(opt => {
+                    const b = document.createElement('button'); b.className = "action-btn"; b.innerText = opt;
+                    b.onclick = () => handleTestMove(id, d, opt, partner);
+                    qArea.appendChild(b);
+                });
+            } else {
+                document.getElementById('test-q').innerText = "Ruch partnera...";
+            }
+
+            // Historia
+            const hSec = document.getElementById('test-history');
+            if(d.last) {
+                hSec.classList.remove('hidden');
+                document.getElementById('test-hist-list').innerHTML = d.last.map(l => 
+                    `<div class="reveal-item" style="border-left-color:${l.m?'var(--success)':'var(--danger)'}">
+                        <small>${l.q}</small><br>${l.a} ${l.m?'✅':'❌'}
+                    </div>`).join('');
+            }
+        });
+    }
+
+    function handleTestMove(id, data, val, partner) {
+        const ref = db.ref('test_v6/rels/'+id);
+        if(data.step === 'ASKING') {
+            let answers = data.ans || []; answers.push(val);
+            if(answers.length >= 3) ref.update({ ans: answers, step: 'GUESSING', idx: 0, turn: partner });
+            else ref.update({ ans: answers, idx: data.idx + 1 });
+        } else {
+            let guesses = data.gus || []; guesses.push(val);
+            if(guesses.length >= 3) ref.update({ gus: guesses, step: 'REVEAL' });
+            else ref.update({ gus: guesses, idx: data.idx + 1 });
+        }
+    }
+
+    function showTestReveal(d, partner) {
+        nav('screen-test-reveal');
+        const list = document.getElementById('test-rev-list'); list.innerHTML = "";
+        d.pack.forEach((qi, i) => {
+            const m = d.ans[i] === d.gus[i];
+            list.innerHTML += `<div class="reveal-item" style="border-left-color:${m?'var(--success)':'var(--danger)'}">
+                <strong>${TEST_QUESTIONS[qi].q}</strong><br>Odp: ${d.ans[i]} ${m?'✅':'❌'}</div>`;
+        });
+    }
+
+    function testConfirmReveal() {
+        const ref = db.ref('test_v6/rels/'+activeTestRelId);
+        ref.once('value', s => {
+            const d = s.val();
+            let matches = 0;
+            let history = d.pack.map((qi, i) => {
+                const m = d.ans[i] === d.gus[i]; if(m) matches++;
+                return { q: TEST_QUESTIONS[qi].q, a: d.ans[i], m: m };
+            });
+            let xp = d.xp + (matches * 100) + 20;
+            let lvl = d.level; if(xp >= lvl*300) { xp=0; lvl++; }
+            ref.update({
+                level: lvl, xp: xp, last: history, ans: [], gus: [], idx: 0,
+                step: 'ASKING', turn: myNick, pack: [0,1,2].map(() => Math.floor(Math.random()*TEST_QUESTIONS.length))
+            });
+            nav('screen-test-dash');
+        });
+    }
+
+    function testLogout() { localStorage.clear(); nav('screen-launcher'); }
+</script>
 </body>
 </html>
