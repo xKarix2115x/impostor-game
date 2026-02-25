@@ -3,220 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impostor & The Test - 2w1</title>
+    <title>The Test - Synchronization</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        body { background-color: #121212; font-family: 'Segoe UI', sans-serif; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background: #222; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); text-align: center; width: 90%; max-width: 450px; border: 1px solid #444; }
+        :root { --bg: #121212; --card: #1e1e1e; --primary: #007bff; --secondary: #6f42c1; --success: #28a745; }
+        body { background-color: var(--bg); font-family: 'Segoe UI', sans-serif; color: #fff; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background: var(--card); padding: 30px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); text-align: center; width: 90%; max-width: 450px; border: 1px solid #333; }
         .hidden { display: none !important; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #444; background: #333; color: white; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 1em; }
-        .btn-green { background: #28a745; color: white; }
-        .btn-blue { background: #007bff; color: white; }
-        .btn-test { background: #e83e8c; color: white; } /* Kolor dla trybu The Test */
-        .option-btn { background: #444; color: white; border: 2px solid #555; margin: 5px 0; }
-        .option-btn.selected { background: #007bff; border-color: #fff; }
-        #playerList { background: #1a1a1a; padding: 10px; border-radius: 10px; margin: 10px 0; font-size: 0.9em; color: #aaa; }
-        .status-msg { font-style: italic; color: #ffc107; margin: 15px 0; }
-        .result-box { padding: 15px; border-radius: 10px; margin: 10px 0; font-weight: bold; }
-        .match { background: #28a745; color: white; }
-        .miss { background: #dc3545; color: white; }
+        
+        /* Styl zależny od akcji */
+        .mode-asking { border-top: 8px solid var(--primary); }
+        .mode-guessing { border-top: 8px solid var(--secondary); }
+
+        .progress-bar { width: 100%; height: 8px; background: #333; border-radius: 4px; margin-bottom: 20px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); transition: width 0.3s; }
+
+        button { width: 100%; padding: 15px; margin: 8px 0; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 1em; }
+        .btn-opt { background: #2a2a2a; color: white; border: 2px solid #444; }
+        .btn-opt:hover { background: #333; }
+        .btn-opt.selected { background: var(--primary); border-color: white; }
+        
+        .score-badge { display: inline-block; padding: 5px 15px; background: #333; border-radius: 20px; font-size: 0.8em; margin-bottom: 10px; color: #aaa; }
+        .status-text { font-style: italic; color: #ffc107; min-height: 24px; }
     </style>
 </head>
 <body>
 
-    <div id="screen-start" class="container">
-        <h1 style="color:#007bff">Gry Towarzyskie</h1>
-        <input type="text" id="input-name" placeholder="Twoje imię">
-        <input type="text" id="input-room" placeholder="Kod pokoju">
-        <button class="btn-green" onclick="handleAuth('create')">STWÓRZ POKÓJ</button>
-        <button class="btn-blue" onclick="handleAuth('join')">DOŁĄCZ DO GRY</button>
-    </div>
-
-    <div id="screen-lobby" class="container hidden">
-        <h2>Pokój: <span id="room-id-display" style="color:#007bff"></span></h2>
-        <div id="playerList">Czekam na graczy...</div>
+    <div id="screen-lobby" class="container">
+        <h1>The Test</h1>
+        <input type="text" id="input-name" placeholder="Twoje imię" style="width:100%; padding:12px; margin:10px 0; border-radius:8px; background:#2a2a2a; color:white; border:1px solid #444;">
+        <input type="text" id="input-room" placeholder="Kod pokoju" style="width:100%; padding:12px; margin:10px 0; border-radius:8px; background:#2a2a2a; color:white; border:1px solid #444;">
+        <button class="btn-opt" style="background:var(--success)" onclick="handleAuth('create')">STWÓRZ POKÓJ</button>
+        <button class="btn-opt" style="background:var(--primary)" onclick="handleAuth('join')">DOŁĄCZ</button>
         <div id="host-panel" class="hidden">
-            <label>Wybierz tryb:</label>
-            <select id="select-mode">
-                <option value="THE_TEST">THE TEST (Dla 2 osób)</option>
-                <option value="PYTANIA">IMPOSTOR (Dla grupy)</option>
-            </select>
-            <button class="btn-green" onclick="startGame()">START</button>
+            <p style="color:#aaa">Czekaj na drugą osobę...</p>
+            <button class="btn-opt" id="start-btn" onclick="startGame()">ROZPOCZNIJ TEST</button>
         </div>
-        <p id="guest-msg">Oczekiwanie na Hosta...</p>
     </div>
 
-    <div id="screen-the-test" class="container hidden">
-        <h2 id="test-title">Twoja kolej!</h2>
-        <p id="test-instruction" class="status-msg"></p>
-        <div id="question-box">
-            <p id="q-text" style="font-size: 1.2em; font-weight: bold;"></p>
-            <div id="options-area"></div>
+    <div id="screen-game" class="container hidden">
+        <div class="score-badge">Synchronizacja: <span id="sync-score">0</span>%</div>
+        <div class="progress-bar"><div id="progress-fill" class="progress-fill" style="width: 0%"></div></div>
+        
+        <h2 id="role-title">Twoja kolej</h2>
+        <p id="status-msg" class="status-text"></p>
+        
+        <div id="question-area">
+            <p id="q-text" style="font-size: 1.3em; font-weight: bold; margin-bottom: 20px;"></p>
+            <div id="options-container"></div>
         </div>
-        <button id="btn-next-test" class="btn-blue hidden" onclick="nextTestStep()">DALEJ</button>
     </div>
 
     <div id="screen-results" class="container hidden">
-        <h2>Wyniki</h2>
-        <div id="results-area"></div>
-        <button class="btn-blue" onclick="resetGame()">ZAGRAJ PONOWNIE</button>
+        <h1 id="final-rank">Koniec!</h1>
+        <h2 style="font-size: 3em; margin: 10px 0;"><span id="final-score">0</span>%</h2>
+        <p id="final-comment"></p>
+        <button class="btn-opt" style="background:var(--primary)" onclick="location.reload()">ZAGRAJ PONOWNIE</button>
     </div>
 
     <script>
-        // --- KONFIGURACJA FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyAQLLZui2v4j3nLLKXhp2brcqsgSyy0W2s",
-            authDomain: "menu-gier.firebaseapp.com",
             databaseURL: "https://menu-gier-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "menu-gier",
-            storageBucket: "menu-gier.firebasedatabase.app",
-            messagingSenderId: "442961627931",
-            appId: "1:442961627931:web:26453bd5720da6037d21be"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         let myName, myRoom, isHost = false;
-        let selectedOption = null;
 
-        // --- PYTANIA DO TRYBU THE TEST ---
-        const TEST_QUESTIONS = [
-            { q: "Gdzie widzisz się za 10 lat?", options: ["Własny biznes", "Podróże po świecie", "Spokojna rodzina"] },
-            { q: "Co jest Twoim priorytetem?", options: ["Pieniądze", "Sława", "Święty spokój"] },
-            { q: "Jaki jest Twój idealny wieczór?", options: ["Impreza w klubie", "Netflix i jedzenie", "Długi spacer"] },
-            { q: "W sytuacji kryzysowej jesteś:", options: ["Liderem", "Obserwatorem", "Panikarzem"] }
+        const QUESTIONS = [
+            { q: "Gdzie widzisz się za 10 lat?", o: ["Własny biznes", "Podróże", "Rodzina"] },
+            { q: "Największa wada?", o: ["Lenistwo", "Spóźnialstwo", "Gadulstwo"] },
+            { q: "Idealny wieczór?", o: ["Klub/Impreza", "Kino/Netflix", "Gry/Hobby"] },
+            { q: "W grupie znajomych jesteś:", o: ["Liderem", "Śmieszkiem", "Słuchaczem"] },
+            { q: "Co wybierasz?", o: ["Pieniądze", "Sława", "Święty spokój"] },
+            { q: "Kto częściej fochuje?", o: ["Ja", "Druga osoba", "Oboje tak samo"] },
+            { q: "Twój poranek to:", o: ["5 minut i wyjście", "Spokojna kawa", "Ciągłe drzemki"] }
         ];
 
         function handleAuth(mode) {
             myName = document.getElementById('input-name').value.trim();
             myRoom = document.getElementById('input-room').value.trim();
-            if(!myName || !myRoom) return alert("Uzupełnij dane!");
-            const ref = db.ref('games/' + myRoom);
+            if(!myName || !myRoom) return alert("Wpisz dane!");
+            
+            const ref = db.ref('test_games/' + myRoom);
             ref.once('value').then(snap => {
-                if(mode === 'create') {
+                if(mode==='create' && snap.exists()) return alert("Pokój zajęty!");
+                if(mode==='create') {
                     isHost = true;
-                    ref.set({ host: myName, status: "LOBBY", mode: "THE_TEST", turn: 0, step: "ASK" });
+                    ref.set({ host: myName, status: "LOBBY", qList: shuffle(QUESTIONS).slice(0,5) });
                 }
-                db.ref(`games/${myRoom}/players/${myName}`).set({ name: myName, choice: "" });
-                document.getElementById('room-id-display').innerText = myRoom;
+                db.ref(`test_games/${myRoom}/players/${myName}`).set({ name: myName });
                 if(isHost) document.getElementById('host-panel').classList.remove('hidden');
-                showScreen('screen-lobby');
+                document.getElementById('screen-lobby').classList.add('hidden');
                 startSync();
             });
         }
 
         function startSync() {
-            db.ref(`games/${myRoom}`).on('value', snap => {
+            db.ref(`test_games/${myRoom}`).on('value', snap => {
                 const data = snap.val();
                 if(!data) return;
-                const players = Object.keys(data.players || {});
-                document.getElementById('playerList').innerHTML = "Gracze: " + players.join(", ");
-
-                if(data.status === "STARTED_TEST") {
-                    runTheTestLogic(data, players);
-                }
+                if(data.status === "STARTED") updateGameUI(data);
+                if(data.status === "FINISHED") showFinal(data);
             });
         }
 
         function startGame() {
-            const mode = document.getElementById('select-mode').value;
-            if(mode === "THE_TEST") {
-                // Wybieramy 2 losowe pytania na tę rundę
-                const qIndices = [
-                    Math.floor(Math.random() * TEST_QUESTIONS.length),
-                    Math.floor(Math.random() * TEST_QUESTIONS.length)
-                ];
-                db.ref(`games/${myRoom}`).update({ 
-                    status: "STARTED_TEST", 
-                    qIndices: qIndices,
-                    activePlayerIdx: 0, // Zaczyna host
-                    step: "ASKING" // Najpierw Gracz A odpowiada o sobie
-                });
-            }
+            const players = Object.keys(db.ref(`test_games/${myRoom}/players`));
+            db.ref(`test_games/${myRoom}`).update({
+                status: "STARTED",
+                currentRound: 0,
+                step: "ASKING", // ASKING -> GUESSING -> SHOW_RESULT
+                scores: 0,
+                activeIdx: 0 // Gracz 0 odpowiada o sobie
+            });
         }
 
-        function runTheTestLogic(data, players) {
-            showScreen('screen-the-test');
-            const activePlayer = players[data.activePlayerIdx];
-            const otherPlayer = players[1 - data.activePlayerIdx];
-            const q = TEST_QUESTIONS[data.qIndices[0]]; // Na razie jedno pytanie dla przykładu uproszczenia
+        function updateGameUI(data) {
+            document.getElementById('screen-game').classList.remove('hidden');
+            const players = Object.keys(data.players);
+            const activePlayer = players[data.activeIdx];
+            const guessPlayer = players[1 - data.activeIdx];
+            const currentQ = data.qList[data.currentRound];
+            
+            // Progress
+            const progress = (data.currentRound / data.qList.length) * 100;
+            document.getElementById('progress-fill').style.width = progress + "%";
+            document.getElementById('sync-score').innerText = Math.round((data.scores / data.qList.length) * 100);
+
+            const container = document.getElementById('screen-game');
+            const optionsDiv = document.getElementById('options-container');
+            optionsDiv.innerHTML = "";
 
             if(data.step === "ASKING") {
-                if(myName === activePlayer) {
-                    document.getElementById('test-title').innerText = "Twoja kolej!";
-                    document.getElementById('test-instruction').innerText = "Odpowiedz szczerze na pytanie:";
-                    renderOptions(q);
-                } else {
-                    document.getElementById('test-title').innerText = "Czekaj...";
-                    document.getElementById('test-instruction').innerText = `${activePlayer} teraz odpowiada o sobie...`;
-                    document.getElementById('question-box').classList.add('hidden');
-                }
-            } else if(data.step === "GUESSING") {
-                if(myName === otherPlayer) {
-                    document.getElementById('test-title').innerText = "Zgaduj!";
-                    document.getElementById('test-instruction').innerText = `Jak myślisz, co wybrał ${activePlayer}?`;
-                    renderOptions(q);
-                } else {
-                    document.getElementById('test-title').innerText = "Czekaj...";
-                    document.getElementById('test-instruction').innerText = `${otherPlayer} próbuje zgadnąć Twoją odpowiedź...`;
-                    document.getElementById('question-box').classList.add('hidden');
-                }
-            } else if(data.step === "RESULT") {
-                showResults(data, players);
+                container.className = "container mode-asking";
+                document.getElementById('status-msg').innerText = myName === activePlayer ? "Odpowiedz szczerze o sobie" : `Czekaj, ${activePlayer} odpowiada...`;
+                if(myName === activePlayer) renderOptions(currentQ.o, (val) => sendAnswer('ansA', val));
+            } 
+            else if(data.step === "GUESSING") {
+                container.className = "container mode-guessing";
+                document.getElementById('status-msg').innerText = myName === guessPlayer ? `Co wybrał ${activePlayer}?` : `Czekaj, ${guessPlayer} zgaduje...`;
+                if(myName === guessPlayer) renderOptions(currentQ.o, (val) => sendAnswer('ansB', val));
             }
+            
+            document.getElementById('q-text').innerText = currentQ.q;
         }
 
-        function renderOptions(q) {
-            document.getElementById('question-box').classList.remove('hidden');
-            document.getElementById('q-text').innerText = q.q;
-            const area = document.getElementById('options-area');
-            area.innerHTML = "";
-            q.options.forEach(opt => {
+        function renderOptions(opts, callback) {
+            opts.forEach(o => {
                 const b = document.createElement('button');
-                b.className = "option-btn";
-                b.innerText = opt;
-                b.onclick = () => {
-                    selectedOption = opt;
-                    document.querySelectorAll('.option-btn').forEach(x => x.classList.remove('selected'));
-                    b.classList.add('selected');
-                    document.getElementById('btn-next-test').classList.remove('hidden');
-                };
-                area.appendChild(b);
+                b.className = "btn-opt";
+                b.innerText = o;
+                b.onclick = () => callback(o);
+                document.getElementById('options-container').appendChild(b);
             });
         }
 
-        function nextTestStep() {
-            const ref = db.ref(`games/${myRoom}`);
+        function sendAnswer(key, val) {
+            const ref = db.ref(`test_games/${myRoom}`);
             ref.once('value').then(snap => {
                 const data = snap.val();
-                if(data.step === "ASKING") {
-                    ref.update({ step: "GUESSING", answerA: selectedOption });
-                } else if(data.step === "GUESSING") {
-                    ref.update({ step: "RESULT", answerB: selectedOption });
+                if(key === 'ansA') {
+                    ref.update({ step: "GUESSING", lastAnsA: val });
+                } else {
+                    let newScore = data.scores + (data.lastAnsA === val ? 1 : 0);
+                    let nextRound = data.currentRound + 1;
+                    if(nextRound >= data.qList.length) {
+                        ref.update({ status: "FINISHED", scores: newScore });
+                    } else {
+                        ref.update({ step: "ASKING", currentRound: nextRound, scores: newScore });
+                    }
                 }
-                document.getElementById('btn-next-test').classList.add('hidden');
             });
         }
 
-        function showResults(data, players) {
-            showScreen('screen-results');
-            const resArea = document.getElementById('results-area');
-            const match = data.answerA === data.answerB;
-            resArea.innerHTML = `
-                <div class="result-box ${match ? 'match' : 'miss'}">
-                    ${match ? "ZGODNOŚĆ! ✅" : "BRAK ZGODNOŚCI ❌"}
-                </div>
-                <p>${players[data.activePlayerIdx]} wybrał: <b>${data.answerA}</b></p>
-                <p>${players[1-data.activePlayerIdx]} zgadywał: <b>${data.answerB}</b></p>
-            `;
+        function showFinal(data) {
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-results').classList.remove('hidden');
+            const pct = Math.round((data.scores / data.qList.length) * 100);
+            document.getElementById('final-score').innerText = pct;
+            
+            let comment = "Musicie więcej ze sobą rozmawiać... 😶";
+            if(pct > 50) comment = "Całkiem nieźle się znacie! 😊";
+            if(pct > 80) comment = "Bratnie dusze! Synchronizacja idealna! 🚀";
+            document.getElementById('final-comment').innerText = comment;
         }
 
-        function resetGame() { location.reload(); }
-        function showScreen(id) {
-            document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-        }
+        function shuffle(array) { return array.sort(() => Math.random() - 0.5); }
     </script>
 </body>
 </html>
