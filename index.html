@@ -11,33 +11,27 @@
         body { background-color: var(--bg); font-family: 'Segoe UI', sans-serif; color: #fff; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         .container { background: var(--card); padding: 30px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); text-align: center; width: 90%; max-width: 450px; border: 1px solid #333; }
         .hidden { display: none !important; }
-        
-        /* Styl zależny od akcji */
         .mode-asking { border-top: 8px solid var(--primary); }
         .mode-guessing { border-top: 8px solid var(--secondary); }
-
         .progress-bar { width: 100%; height: 8px; background: #333; border-radius: 4px; margin-bottom: 20px; overflow: hidden; }
         .progress-fill { height: 100%; background: var(--primary); transition: width 0.3s; }
-
         button { width: 100%; padding: 15px; margin: 8px 0; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 1em; }
         .btn-opt { background: #2a2a2a; color: white; border: 2px solid #444; }
         .btn-opt:hover { background: #333; }
-        .btn-opt.selected { background: var(--primary); border-color: white; }
-        
         .score-badge { display: inline-block; padding: 5px 15px; background: #333; border-radius: 20px; font-size: 0.8em; margin-bottom: 10px; color: #aaa; }
-        .status-text { font-style: italic; color: #ffc107; min-height: 24px; }
+        input { width:100%; padding:12px; margin:10px 0; border-radius:8px; background:#2a2a2a; color:white; border:1px solid #444; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
     <div id="screen-lobby" class="container">
         <h1>The Test</h1>
-        <input type="text" id="input-name" placeholder="Twoje imię" style="width:100%; padding:12px; margin:10px 0; border-radius:8px; background:#2a2a2a; color:white; border:1px solid #444;">
-        <input type="text" id="input-room" placeholder="Kod pokoju" style="width:100%; padding:12px; margin:10px 0; border-radius:8px; background:#2a2a2a; color:white; border:1px solid #444;">
+        <input type="text" id="input-name" placeholder="Twoje imię">
+        <input type="text" id="input-room" placeholder="Kod pokoju">
         <button class="btn-opt" style="background:var(--success)" onclick="handleAuth('create')">STWÓRZ POKÓJ</button>
         <button class="btn-opt" style="background:var(--primary)" onclick="handleAuth('join')">DOŁĄCZ</button>
         <div id="host-panel" class="hidden">
-            <p style="color:#aaa">Czekaj na drugą osobę...</p>
+            <p id="player-count" style="color:#aaa">Czekam na drugą osobę...</p>
             <button class="btn-opt" id="start-btn" onclick="startGame()">ROZPOCZNIJ TEST</button>
         </div>
     </div>
@@ -45,10 +39,8 @@
     <div id="screen-game" class="container hidden">
         <div class="score-badge">Synchronizacja: <span id="sync-score">0</span>%</div>
         <div class="progress-bar"><div id="progress-fill" class="progress-fill" style="width: 0%"></div></div>
-        
         <h2 id="role-title">Twoja kolej</h2>
-        <p id="status-msg" class="status-text"></p>
-        
+        <p id="status-msg" style="color: #ffc107; font-style: italic;"></p>
         <div id="question-area">
             <p id="q-text" style="font-size: 1.3em; font-weight: bold; margin-bottom: 20px;"></p>
             <div id="options-container"></div>
@@ -56,7 +48,7 @@
     </div>
 
     <div id="screen-results" class="container hidden">
-        <h1 id="final-rank">Koniec!</h1>
+        <h1>Koniec!</h1>
         <h2 style="font-size: 3em; margin: 10px 0;"><span id="final-score">0</span>%</h2>
         <p id="final-comment"></p>
         <button class="btn-opt" style="background:var(--primary)" onclick="location.reload()">ZAGRAJ PONOWNIE</button>
@@ -67,8 +59,11 @@
             apiKey: "AIzaSyAQLLZui2v4j3nLLKXhp2brcqsgSyy0W2s",
             databaseURL: "https://menu-gier-default-rtdb.europe-west1.firebasedatabase.app",
         };
+
+        // Inicjalizacja Firebase w wersji Compat
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        
         let myName, myRoom, isHost = false;
 
         const QUESTIONS = [
@@ -77,8 +72,7 @@
             { q: "Idealny wieczór?", o: ["Klub/Impreza", "Kino/Netflix", "Gry/Hobby"] },
             { q: "W grupie znajomych jesteś:", o: ["Liderem", "Śmieszkiem", "Słuchaczem"] },
             { q: "Co wybierasz?", o: ["Pieniądze", "Sława", "Święty spokój"] },
-            { q: "Kto częściej fochuje?", o: ["Ja", "Druga osoba", "Oboje tak samo"] },
-            { q: "Twój poranek to:", o: ["5 minut i wyjście", "Spokojna kawa", "Ciągłe drzemki"] }
+            { q: "Kto częściej fochuje?", o: ["Ja", "Druga osoba", "Oboje tak samo"] }
         ];
 
         function handleAuth(mode) {
@@ -88,13 +82,15 @@
             
             const ref = db.ref('test_games/' + myRoom);
             ref.once('value').then(snap => {
-                if(mode==='create' && snap.exists()) return alert("Pokój zajęty!");
-                if(mode==='create') {
+                if(mode === 'create') {
                     isHost = true;
-                    ref.set({ host: myName, status: "LOBBY", qList: shuffle(QUESTIONS).slice(0,5) });
+                    ref.set({ 
+                        host: myName, 
+                        status: "LOBBY", 
+                        qList: QUESTIONS.sort(() => Math.random() - 0.5).slice(0,5) 
+                    });
                 }
                 db.ref(`test_games/${myRoom}/players/${myName}`).set({ name: myName });
-                if(isHost) document.getElementById('host-panel').classList.remove('hidden');
                 document.getElementById('screen-lobby').classList.add('hidden');
                 startSync();
             });
@@ -104,30 +100,44 @@
             db.ref(`test_games/${myRoom}`).on('value', snap => {
                 const data = snap.val();
                 if(!data) return;
-                if(data.status === "STARTED") updateGameUI(data);
-                if(data.status === "FINISHED") showFinal(data);
+
+                // Sprawdzanie liczby graczy w lobby
+                if(data.status === "LOBBY") {
+                    document.getElementById('screen-lobby').classList.remove('hidden');
+                    if(isHost) {
+                        document.getElementById('host-panel').classList.remove('hidden');
+                        const pCount = data.players ? Object.keys(data.players).length : 0;
+                        document.getElementById('player-count').innerText = `Graczy: ${pCount}/2`;
+                    }
+                }
+
+                if(data.status === "STARTED") {
+                    document.getElementById('screen-lobby').classList.add('hidden');
+                    document.getElementById('screen-game').classList.remove('hidden');
+                    updateGameUI(data);
+                }
+                if(data.status === "FINISHED") {
+                    showFinal(data);
+                }
             });
         }
 
         function startGame() {
-            const players = Object.keys(db.ref(`test_games/${myRoom}/players`));
             db.ref(`test_games/${myRoom}`).update({
                 status: "STARTED",
                 currentRound: 0,
-                step: "ASKING", // ASKING -> GUESSING -> SHOW_RESULT
+                step: "ASKING",
                 scores: 0,
-                activeIdx: 0 // Gracz 0 odpowiada o sobie
+                activeIdx: 0 
             });
         }
 
         function updateGameUI(data) {
-            document.getElementById('screen-game').classList.remove('hidden');
             const players = Object.keys(data.players);
             const activePlayer = players[data.activeIdx];
             const guessPlayer = players[1 - data.activeIdx];
             const currentQ = data.qList[data.currentRound];
             
-            // Progress
             const progress = (data.currentRound / data.qList.length) * 100;
             document.getElementById('progress-fill').style.width = progress + "%";
             document.getElementById('sync-score').innerText = Math.round((data.scores / data.qList.length) * 100);
@@ -138,33 +148,31 @@
 
             if(data.step === "ASKING") {
                 container.className = "container mode-asking";
-                document.getElementById('status-msg').innerText = myName === activePlayer ? "Odpowiedz szczerze o sobie" : `Czekaj, ${activePlayer} odpowiada...`;
-                if(myName === activePlayer) renderOptions(currentQ.o, (val) => sendAnswer('ansA', val));
-            } 
-            else if(data.step === "GUESSING") {
+                document.getElementById('status-msg').innerText = (myName === activePlayer) ? "ODPOWIEDZ O SOBIE" : `Czekaj, ${activePlayer} odpowiada...`;
+                if(myName === activePlayer) renderOptions(currentQ.o, 'ansA');
+            } else {
                 container.className = "container mode-guessing";
-                document.getElementById('status-msg').innerText = myName === guessPlayer ? `Co wybrał ${activePlayer}?` : `Czekaj, ${guessPlayer} zgaduje...`;
-                if(myName === guessPlayer) renderOptions(currentQ.o, (val) => sendAnswer('ansB', val));
+                document.getElementById('status-msg').innerText = (myName === guessPlayer) ? `CO WYBRAŁ ${activePlayer}?` : `Czekaj, ${guessPlayer} zgaduje...`;
+                if(myName === guessPlayer) renderOptions(currentQ.o, 'ansB');
             }
-            
             document.getElementById('q-text').innerText = currentQ.q;
         }
 
-        function renderOptions(opts, callback) {
+        function renderOptions(opts, type) {
             opts.forEach(o => {
                 const b = document.createElement('button');
                 b.className = "btn-opt";
                 b.innerText = o;
-                b.onclick = () => callback(o);
+                b.onclick = () => sendAnswer(type, o);
                 document.getElementById('options-container').appendChild(b);
             });
         }
 
-        function sendAnswer(key, val) {
+        function sendAnswer(type, val) {
             const ref = db.ref(`test_games/${myRoom}`);
             ref.once('value').then(snap => {
                 const data = snap.val();
-                if(key === 'ansA') {
+                if(type === 'ansA') {
                     ref.update({ step: "GUESSING", lastAnsA: val });
                 } else {
                     let newScore = data.scores + (data.lastAnsA === val ? 1 : 0);
@@ -183,14 +191,9 @@
             document.getElementById('screen-results').classList.remove('hidden');
             const pct = Math.round((data.scores / data.qList.length) * 100);
             document.getElementById('final-score').innerText = pct;
-            
-            let comment = "Musicie więcej ze sobą rozmawiać... 😶";
-            if(pct > 50) comment = "Całkiem nieźle się znacie! 😊";
-            if(pct > 80) comment = "Bratnie dusze! Synchronizacja idealna! 🚀";
+            let comment = pct > 70 ? "Idealne dopasowanie! 🚀" : "Może być lepiej... 😶";
             document.getElementById('final-comment').innerText = comment;
         }
-
-        function shuffle(array) { return array.sort(() => Math.random() - 0.5); }
     </script>
 </body>
 </html>
