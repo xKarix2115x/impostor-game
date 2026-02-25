@@ -3,117 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Impostor Online PRO</title>
+    <title>Impostor & The Test - 2w1</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    
     <style>
-        body { 
-            background-color: #1a1a1a; font-family: 'Segoe UI', Tahoma, sans-serif; color: #333;
-            display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0;
-        }
-        .container { 
-            background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            text-align: center; width: 90%; max-width: 450px; 
-        }
+        body { background-color: #121212; font-family: 'Segoe UI', sans-serif; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: #222; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); text-align: center; width: 90%; max-width: 450px; border: 1px solid #444; }
         .hidden { display: none !important; }
-        
-        .player-card {
-            position: relative; width: 160px; height: 220px; margin: 20px auto;
-            transform-style: preserve-3d; transition: transform 0.6s; cursor: pointer;
-        }
-        .player-card.flipped { transform: rotateY(180deg); }
-        .card-front, .card-back {
-            position: absolute; width: 100%; height: 100%;
-            backface-visibility: hidden; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; border: 3px solid #333; padding: 15px; box-sizing: border-box;
-        }
-        .card-front { background: #007bff; color: white; font-size: 1.1em; }
-        .card-back { transform: rotateY(180deg); color: white; text-align: center; font-size: 1.2em; }
-        .impostor-bg { background: #dc3545; }
-        .crew-bg { background: #28a745; }
-
-        button { 
-            width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 10px; 
-            font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 1em;
-        }
-        .btn-create { background: #28a745; color: white; }
-        .btn-join { background: #007bff; color: white; }
-        .btn-start { background: #ffc107; color: black; }
-        .btn-exit { background: #6c757d; color: white; }
-        .btn-reveal { background: #dc3545; color: white; margin-top: 15px; }
-        
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; }
-        #playerList { text-align: left; background: #f9f9f9; padding: 15px; border-radius: 10px; margin: 15px 0; border: 1px solid #ddd; }
-        .reveal-text { color: #dc3545; font-weight: bold; border: 2px dashed #dc3545; padding: 5px; border-radius: 5px; margin-left: 5px; }
-        
-        .setting-row { display: flex; align-items: center; justify-content: space-between; margin: 10px 0; font-weight: bold; }
-        .setting-row select { width: 60px; margin: 0; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #444; background: #333; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 1em; }
+        .btn-green { background: #28a745; color: white; }
+        .btn-blue { background: #007bff; color: white; }
+        .btn-test { background: #e83e8c; color: white; } /* Kolor dla trybu The Test */
+        .option-btn { background: #444; color: white; border: 2px solid #555; margin: 5px 0; }
+        .option-btn.selected { background: #007bff; border-color: #fff; }
+        #playerList { background: #1a1a1a; padding: 10px; border-radius: 10px; margin: 10px 0; font-size: 0.9em; color: #aaa; }
+        .status-msg { font-style: italic; color: #ffc107; margin: 15px 0; }
+        .result-box { padding: 15px; border-radius: 10px; margin: 10px 0; font-weight: bold; }
+        .match { background: #28a745; color: white; }
+        .miss { background: #dc3545; color: white; }
     </style>
 </head>
 <body>
 
     <div id="screen-start" class="container">
-        <h1 style="color:#007bff">Impostor Online</h1>
+        <h1 style="color:#007bff">Gry Towarzyskie</h1>
         <input type="text" id="input-name" placeholder="Twoje imię">
         <input type="text" id="input-room" placeholder="Kod pokoju">
-        <button class="btn-create" onclick="handleAuth('create')">STWÓRZ POKÓJ</button>
-        <button class="btn-join" onclick="handleAuth('join')">DOŁĄCZ DO GRY</button>
+        <button class="btn-green" onclick="handleAuth('create')">STWÓRZ POKÓJ</button>
+        <button class="btn-blue" onclick="handleAuth('join')">DOŁĄCZ DO GRY</button>
     </div>
 
     <div id="screen-lobby" class="container hidden">
         <h2>Pokój: <span id="room-id-display" style="color:#007bff"></span></h2>
         <div id="playerList">Czekam na graczy...</div>
         <div id="host-panel" class="hidden">
-            <div class="setting-row">
-                <span>Tryb:</span>
-                <select id="select-mode">
-                    <option value="KARTY">KARTY</option>
-                    <option value="PYTANIA">PYTANIA</option>
-                </select>
-            </div>
-            <div class="setting-row">
-                <span>Liczba Impostorów:</span>
-                <select id="select-imp-count">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                </select>
-            </div>
-            <button class="btn-start" onclick="startGame()">ROZPOCZNIJ MECZ</button>
+            <label>Wybierz tryb:</label>
+            <select id="select-mode">
+                <option value="THE_TEST">THE TEST (Dla 2 osób)</option>
+                <option value="PYTANIA">IMPOSTOR (Dla grupy)</option>
+            </select>
+            <button class="btn-green" onclick="startGame()">START</button>
         </div>
         <p id="guest-msg">Oczekiwanie na Hosta...</p>
-        <button class="btn-exit" onclick="exitGame()">WYJDŹ</button>
     </div>
 
-    <div id="screen-karty" class="container hidden">
-        <h3>Twoja Karta:</h3>
-        <div class="player-card" onclick="this.classList.toggle('flipped')">
-            <div class="card-front">KLIKNIJ ABY ODKRYĆ</div>
-            <div id="card-back-content" class="card-back"></div>
+    <div id="screen-the-test" class="container hidden">
+        <h2 id="test-title">Twoja kolej!</h2>
+        <p id="test-instruction" class="status-msg"></p>
+        <div id="question-box">
+            <p id="q-text" style="font-size: 1.2em; font-weight: bold;"></p>
+            <div id="options-area"></div>
         </div>
-        <button class="btn-exit" onclick="exitGame()">OPUŚĆ I ZRESETUJ</button>
-    </div>
-
-    <div id="screen-pytania" class="container hidden">
-        <h2 id="role-display">Rola</h2>
-        <p id="question-display" style="font-weight:bold; background:#f0f0f0; padding:15px; border-radius:10px;"></p>
-        <input type="text" id="answer-input" placeholder="Twoja odpowiedź...">
-        <button class="btn-create" id="btn-send-ans" onclick="sendAnswer()">WYŚLIJ</button>
-        <p id="sent-msg" class="hidden" style="color:#28a745; font-weight:bold;">Wysłano! Czekaj na grupę.</p>
+        <button id="btn-next-test" class="btn-blue hidden" onclick="nextTestStep()">DALEJ</button>
     </div>
 
     <div id="screen-results" class="container hidden">
-        <h2>Wyniki i Debata</h2>
-        <div id="results-area" style="text-align:left; max-height: 300px; overflow-y: auto;"></div>
-        <div id="reveal-section" class="hidden">
-             <button class="btn-reveal" onclick="revealImpostor()">POKAŻ KTO BYŁ IMPOSTOREM</button>
-        </div>
-        <button class="btn-join" onclick="exitGame()">ZAGRAJ PONOWNIE (RESET)</button>
+        <h2>Wyniki</h2>
+        <div id="results-area"></div>
+        <button class="btn-blue" onclick="resetGame()">ZAGRAJ PONOWNIE</button>
     </div>
 
     <script>
+        // --- KONFIGURACJA FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyAQLLZui2v4j3nLLKXhp2brcqsgSyy0W2s",
             authDomain: "menu-gier.firebaseapp.com",
@@ -123,36 +75,32 @@
             messagingSenderId: "442961627931",
             appId: "1:442961627931:web:26453bd5720da6037d21be"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         let myName, myRoom, isHost = false;
+        let selectedOption = null;
 
-        const POOL_KARTY = [{ word: "Dodatek", hint: "Wzrost, Uzupełnienie" }, { word: "Rada", hint: "Spotkanie, Decyzja" }, { word: "Popołudnie", hint: "Słońce, Praca" }, { word: "Lotnisko", hint: "Samolot, Kontrola" }, { word: "Zabawa", hint: "Śmiech, Czas wolny" }, { word: "Strój", hint: "Moda, Krawiec" }, { word: "Urządzenie", hint: "Prąd, Technika" }, { word: "Łuk", hint: "Strzała, Architektura" }, { word: "Argument", hint: "Spór, Zdanie" }, { word: "Sztuka", hint: "Obraz, Muzeum" }, { word: "Baza", hint: "Start, Fundament" }, { word: "Kąpiel", hint: "Woda, Relaks" }, { word: "Koraliki", hint: "Nitka, Biżuteria" }, { word: "Niedźwiedzie", hint: "Sen, Miś" }, { word: "Łóżka", hint: "Poduszka, Sypialnia" }, { word: "Zachowanie", hint: "Zasady, Kultura" }, { word: "Jagoda", hint: "Las, Krzew" }, { word: "Kawałek", hint: "Tort, Fragment" }, { word: "Krew", hint: "Serce, Czerwony" }, { word: "Łodzie", hint: "Woda, Żagle" }, { word: "Bomba", hint: "Wybuch, Czas" }, { word: "Granica", hint: "Paszport, Linia" }, { word: "Chłopcy", hint: "Gra, Młodość" }, { word: "Śniadanie", hint: "Jajko, Rano" }, { word: "Żarówka", hint: "Światło, Włókno" }, { word: "Aparat", hint: "Zdjęcie, Obiektyw" }, { word: "Puszka", hint: "Metal, Konserwa" }, { word: "Płótno", hint: "Obraz, Malarz" }, { word: "Stolarz", hint: "Piła, Drewno" }, { word: "Obsada", hint: "Aktorzy, Film" }, { word: "Kot", hint: "Wąsy, Mruczenie" }, { word: "Bydło", hint: "Pole, Farma" }, { word: "Piwnica", hint: "Wino, Ciemno" }, { word: "Kościół", hint: "Ołtarz, Niedziela" }, { word: "Klub", hint: "Muzyka, Noc" }, { word: "Trener", hint: "Drużyna, Ćwiczenia" }, { word: "Kolor", hint: "Tęcza, Barwnik" }, { word: "Grzebień", hint: "Włosy, Plastik" }, { word: "Korek", hint: "Butelka, Wino" }, { word: "Okładka", hint: "Książka, Grafika" }, { word: "Krowa", hint: "Mleko, Róg" }, { word: "Krakers", hint: "Słony, Chrupki" }, { word: "Skrzynka", hint: "Drewno, Listy" }, { word: "Kredka", hint: "Wosk, Rysowanie" }, { word: "Tłum", hint: "Ludzie, Ścisk" }, { word: "Krzywa", hint: "Linia, Zakręt" }, { word: "Projekt", hint: "Plan, Rysunek" }, { word: "Szczegół", hint: "Lupa, Ważny" }, { word: "Dinozaury", hint: "Jura, Kopalnia" }, { word: "Pies", hint: "Smycz, Szczekanie" }, { word: "Śródmieście", hint: "Hałas, Centrum" }, { word: "Trzęsienie Ziemi", hint: "Wibracje, Skala Richtera" }, { word: "Krawędź", hint: "Spadek, Ostry" }, { word: "Edukacja", hint: "Nauka, Stopnie" }, { word: "Koniec", hint: "Finał, Czas" }, { word: "Przykład", hint: "Wyjaśnienie, Wzór" }, { word: "Istnienie", hint: "Filozofia, Życie" }, { word: "Ekspert", hint: "Wiedza, Ocena" }, { word: "Wróżki", hint: "Magia, Skrzydła" }, { word: "Upadek", hint: "Upadek, Grawitacja" }, { word: "Rodzina", hint: "Dom, Więzy" }, { word: "Gospodarstwo", hint: "Pole, Rolnik" }, { word: "Smak", hint: "Język, Cukier" }, { word: "Ciało", hint: "Mięśnie, Skóra" }, { word: "Lot", hint: "Skrzydła, Niebo" }, { word: "Piętro", hint: "Schody, Wysokość" }, { word: "Siła", hint: "Moc, Energia" }, { word: "Żaba", hint: "Zielony, Kumkanie" }, { word: "Ogród", hint: "Rośliny, Woda" }, { word: "Koza", hint: "Rogi, Mleko" }, { word: "Złoto", hint: "Skarb, Żółty" }, { word: "Dziadek", hint: "Wiek, Rodzina" }, { word: "Winogrono", hint: "Wino, Kiść" }, { word: "Grupa", hint: "Zespół, Ludzie" }, { word: "Port", hint: "Statki, Kotwica" }, { word: "Zdrowie", hint: "Lekarz, Forma" }, { word: "Kura", hint: "Jajko, Pióra" }, { word: "Dziura", hint: "Ciemny, Przepaść" }, { word: "Sopel Lodu", hint: "Zima, Kształt" }, { word: "Wzrost", hint: "Wysokość, Zmiana" }, { word: "Dżinsy", hint: "Niebieski, Spodnie" }, { word: "Podróż", hint: "Bagaż, Odległość" }, { word: "Sędzia", hint: "Prawo, Wyrok" }, { word: "Latawiec", hint: "Wiatr, Sznurek" }, { word: "Kotek", hint: "Młody, Futro" }, { word: "Robotnik", hint: "Praca, Kask" }, { word: "Język", hint: "Słowa, Usta" }, { word: "Listy", hint: "Poczta, Papier" }, { word: "Winda", hint: "Góra/Dół, Szybko" }, { word: "Jaszczurki", hint: "Skała, Płazy" }, { word: "Bochenek", hint: "Chleb, Piekarnia" }, { word: "Medalion", hint: "Szyja, Nagroda" }, { word: "Miłość", hint: "Serce, Uczucie" }, { word: "Rynek", hint: "Sklep, Cena" }, { word: "Maska", hint: "Twarz, Karnawał" }, { word: "Masa", hint: "Waga, Ciężar" }, { word: "Piosenka", hint: "Melodia, Słowa" }, { word: "Pieniądze", hint: "Bank, Portfel" }, { word: "Mięsień", hint: "Siła, Trening" }, { word: "Naród", hint: "Flaga, Państwo" }, { word: "Szyja", hint: "Głowa, Gardło" }, { word: "Notatnik", hint: "Pisanie, Lekcja" }, { word: "Wiadro", hint: "Woda, Plastik" }, { word: "Rodzice", hint: "Dzieci, Dom" }, { word: "Przyjęcie", hint: "Goście, Tort" }, { word: "Kieszeń", hint: "Spodnie, Monety" }, { word: "Trucizna", hint: "Śmierć, Chemia" }, { word: "Ziemniak", hint: "Kopanie, Frytki" }, { word: "Królowa", hint: "Korona, Monarchia" }, { word: "Ruchome Piaski", hint: "Pułapka, Pustynia" }, { word: "Kolec", hint: "Róża, Ostry" }, { word: "Kolej", hint: "Pociąg, Szyny" }, { word: "Szczur", hint: "Kanał, Ogon" }, { word: "Czytanie", hint: "Oko, Lektura" }, { word: "Szacunek", hint: "Uprzejmość, Postawa" }, { word: "Nagroda", hint: "Zwycięstwo, Medal" }, { word: "Zagadka", hint: "Tajemnica, Rozwiązanie" }, { word: "Pierścień", hint: "Złoto, Palec" }, { word: "Korzeń", hint: "Ziemia, Drzewo" }, { word: "Pocierać", hint: "Ciepło, Dłonie" }, { word: "Sól", hint: "Słony, Biały" }, { word: "Scena", hint: "Aktorzy, Zasłona" }, { word: "Śruba", hint: "Metal, Gwint" }, { word: "Nasienie", hint: "Rośliny, Małe" }, { word: "Potrząsać", hint: "Rytm, Wibracje" }, { word: "Prześcieradło", hint: "Spanie, Biały" }, { word: "Zaszokować", hint: "Napięcie, Energia" }, { word: "Pokazać", hint: "Palec, Prezentacja" }, { word: "Siostra", hint: "Rodzeństwo, Kobieta" }, { word: "Rozmiar", hint: "Duży/Mały, Miara" }, { word: "Skóra", hint: "Dotyk, Ciało" }, { word: "Zapaść", hint: "Brak sił, Upadek" }, { word: "Węże", hint: "Jad, Beznogi" }, { word: "Pająki", hint: "Sieć, Osiem nóg" }, { word: "Gąbka", hint: "Woda, Mycie" }, { word: "Łyżka", hint: "Zupa, Jedzenie" }, { word: "Wiosna", hint: "Kwitnienie, Ciepło" }, { word: "Plac", hint: "Centrum, Spotkanie" }, { word: "Stacja", hint: "Paliwo, Pociąg" }, { word: "Kije", hint: "Drewno, Laska" }, { word: "Sklep", hint: "Kupowanie, Okno" }, { word: "Słoma", hint: "Siano, Suchy" }, { word: "Ulica", hint: "Asfalt, Samochody" }, { word: "Odcinek", hint: "Kawałek, Linia" }, { word: "Substancja", hint: "Chemia, Masa" }, { word: "Niespodzianka", hint: "Prezent, Szok" }, { word: "Rozmowa", hint: "Słowa, Głos" }, { word: "Czołg", hint: "Pancerz, Wojna" }, { word: "Zespół", hint: "Ludzie, Cel" }, { word: "Test", hint: "Wiedza, Egzamin" }, { word: "Teoria", hint: "Hipoteza, Myślenie" }, { word: "Wybieg", hint: "Modelki, Chód" }, { word: "Bilet", hint: "Wejście, Pieniądze" }, { word: "Pomidory", hint: "Czerwony, Warzywo" }, { word: "Ząb", hint: "Biały, Ból" }, { word: "Pasta do Zębów", hint: "Mięta, Szczotka" }, { word: "Zabawka", hint: "Dziecko, Gra" }, { word: "Ślad", hint: "Trop, But" }, { word: "Drzewo", hint: "Liście, Korzeń" }, { word: "Spodnie", hint: "Nogawki, Ubranie" }, { word: "Ciężarówka", hint: "Ładunek, Duży" }, { word: "Wanna", hint: "Piana, Woda" }, { word: "Projekt", hint: "Plan, Rysunek" }, { word: "Szereg", hint: "Linia, Porządek" }, { word: "Gość", hint: "Wizyta, Obcy" }, { word: "Głos", hint: "Mówienie, Krzyk" }, { word: "Wulkan", hint: "Lawa, Góra" }, { word: "Siatkówka", hint: "Plaża, Piłka" }, { word: "Woda", hint: "Picie, Deszcz" }, { word: "Pustynia", hint: "Piasek, Sucho" }, { word: "Wiatr", hint: "Powietrze, Ruch" }, { word: "Kobieta", hint: "Płeć, Siła" }, { word: "Kobiety", hint: "Grupa, Dziewczyny" }, { word: "Praca", hint: "Wysiłek, Biuro" }, { word: "Przędza", hint: "Włókno, Szycie" }, { word: "Cynk", hint: "Metal, Pierwiastek" }, { word: "Zamek", hint: "Klucz, Rycerz" }, { word: "Blok", hint: "Budynek, Beton" }, { word: "Cukier", hint: "Słodki, Ciasteczka" }, { word: "Duch", hint: "Niewidzialny, Strach" }, { word: "Dźwięk", hint: "Słuch, Głośnik" }, { word: "Filtr", hint: "Woda, Czysty" }, { word: "Głowa", hint: "Myślenie, Czapka" }, { word: "Grzyb", hint: "Las, Kapelusz" }, { word: "Igła", hint: "Szycie, Ból" }, { word: "Kabel", hint: "Prąd, Łączenie" }, { word: "Kamień", hint: "Ciężki, Rzucanie" }, { word: "Klucz", hint: "Drzwi, Otwieranie" }, { word: "Kompas", hint: "Kierunek, Północ" }, { word: "Książka", hint: "Strony, Czytanie" }, { word: "Lampa", hint: "Żarówka, Biurko" }, { word: "Liczba", hint: "Matematyka, Dużo" }, { word: "Linia", hint: "Prosty, Kreska" }, { word: "Łódź", hint: "Woda, Wiosło" }, { word: "Mapa", hint: "Podróż, Droga" }, { word: "Miecz", hint: "Rycerz, Broń" }, { word: "Młotek", hint: "Gwóźdź, Drewno" }, { word: "Motyl", hint: "Skrzydła, Kolor" }, { word: "Mrówka", hint: "Mały, Kolonia" }, { word: "Mydło", hint: "Piana, Mycie" }, { word: "Narzędzie", hint: "Warsztat, Naprawa" }, { word: "Noga", hint: "Chodzenie, Stopa" }, { word: "Obraz", hint: "Rama, Kolor" }, { word: "Ogon", hint: "Zwierzę, Koniec" }, { word: "Ogień", hint: "Gorący, Dym" }, { word: "Okienko", hint: "Szyba, Widok" }, { word: "Oko", hint: "Widzenie, Kolor" }, { word: "Olej", hint: "Silnik, Gotowanie" }, { word: "Paliwo", hint: "Silnik, Benzyna" }, { word: "Pas", hint: "Spodnie, Zapinanie" }, { word: "Piasek", hint: "Plaża, Pustynia" }, { word: "Pióro", hint: "Ptak, Pisanie" }, { word: "Plecak", hint: "Szkola, Ramiona" }, { word: "Płyn", hint: "Woda, Butelka" }, { word: "Promień", hint: "Światło, Prosto" }, { word: "Pręt", hint: "Metal, Długi" }, { word: "Punkt", hint: "Koniec, Miejsce" }, { word: "Ramię", hint: "Ręka, Siła" }, { word: "Ręcznik", hint: "Kąpiel, Suchy" }, { word: "Sekret", hint: "Tajemnica, Szept" }, { word: "Słońce", hint: "Gaz, Lato" }, { word: "Smok", hint: "Ogień, Skrzydła" }, { word: "Statek", hint: "Morze, Rejs" }, { word: "Stół", hint: "Jedzenie, Drewno" }, { word: "Sygnał", hint: "Radio, Ostrzeżenie" }, { word: "Szkoła", hint: "Lekcje, Uczniowie" }, { word: "Szklanka", hint: "Picielnia, Szkło" }];
-        
-        const POOL_PYTANIA = [
-            { name: "Jedzenie", CREWMATE: "Jaką potrawę najchętniej zamawiasz?", IMPOSTOR: "Co potrafisz ugotować najlepiej?" },
-            { name: "Podróże", CREWMATE: "Gdzie chcesz pojechać na wakacje?", IMPOSTOR: "Gdzie ostatnio byłeś?" },
-            { name: "Zwierzęta", CREWMATE: "Ulubione zwierzę domowe?", IMPOSTOR: "Najgroźniejsze zwierzę świata?" }
+        // --- PYTANIA DO TRYBU THE TEST ---
+        const TEST_QUESTIONS = [
+            { q: "Gdzie widzisz się za 10 lat?", options: ["Własny biznes", "Podróże po świecie", "Spokojna rodzina"] },
+            { q: "Co jest Twoim priorytetem?", options: ["Pieniądze", "Sława", "Święty spokój"] },
+            { q: "Jaki jest Twój idealny wieczór?", options: ["Impreza w klubie", "Netflix i jedzenie", "Długi spacer"] },
+            { q: "W sytuacji kryzysowej jesteś:", options: ["Liderem", "Obserwatorem", "Panikarzem"] }
         ];
 
         function handleAuth(mode) {
             myName = document.getElementById('input-name').value.trim();
             myRoom = document.getElementById('input-room').value.trim();
             if(!myName || !myRoom) return alert("Uzupełnij dane!");
-
             const ref = db.ref('games/' + myRoom);
             ref.once('value').then(snap => {
                 if(mode === 'create') {
-                    if(snap.exists()) return alert("Pokój już istnieje!");
                     isHost = true;
-                    ref.onDisconnect().remove();
-                    ref.set({ host: myName, status: "LOBBY", revealed: false });
+                    ref.set({ host: myName, status: "LOBBY", mode: "THE_TEST", turn: 0, step: "ASK" });
                 }
-                db.ref(`games/${myRoom}/players/${myName}`).set({ name: myName, ans: "" });
-                db.ref(`games/${myRoom}/players/${myName}`).onDisconnect().remove();
-                if(isHost) document.getElementById('host-panel').classList.remove('hidden');
+                db.ref(`games/${myRoom}/players/${myName}`).set({ name: myName, choice: "" });
                 document.getElementById('room-id-display').innerText = myRoom;
+                if(isHost) document.getElementById('host-panel').classList.remove('hidden');
                 showScreen('screen-lobby');
                 startSync();
             });
@@ -161,94 +109,110 @@
         function startSync() {
             db.ref(`games/${myRoom}`).on('value', snap => {
                 const data = snap.val();
-                if(!data) { if(myName) location.reload(); return; }
-                const players = data.players || {};
-                document.getElementById('playerList').innerHTML = "<b>Gracze:</b> " + Object.keys(players).join(", ");
-                
-                if(data.status === "STARTED") {
-                    const me = players[myName];
-                    if(data.mode === "KARTY") {
-                        showScreen('screen-karty');
-                        const cardBack = document.getElementById('card-back-content');
-                        if(me.isImp) {
-                            // ROZDZIELANIE PODPOWIEDZI NA PODSTAWIE ALFABETYCZNEJ LISTY IMPOSTORÓW
-                            const allHints = data.set.hint.split(',').map(h => h.trim());
-                            const impNames = Object.keys(players).filter(name => players[name].isImp).sort();
-                            const myIndex = impNames.indexOf(myName);
-                            const myUniqueHint = allHints[myIndex % allHints.length];
-                            
-                            cardBack.innerText = "IMPOSTOR\n\nPodpowiedź:\n" + myUniqueHint;
-                            cardBack.className = "card-back impostor-bg";
-                        } else {
-                            cardBack.innerText = "HASŁO:\n\n" + data.set.word;
-                            cardBack.className = "card-back crew-bg";
-                        }
-                    } else {
-                        showScreen('screen-pytania');
-                        document.getElementById('role-display').innerText = me.isImp ? "IMPOSTOR" : "ZAŁOGANT";
-                        document.getElementById('role-display').style.color = me.isImp ? "#dc3545" : "#28a745";
-                        document.getElementById('question-display').innerText = me.isImp ? data.set.IMPOSTOR : data.set.CREWMATE;
-                    }
+                if(!data) return;
+                const players = Object.keys(data.players || {});
+                document.getElementById('playerList').innerHTML = "Gracze: " + players.join(", ");
+
+                if(data.status === "STARTED_TEST") {
+                    runTheTestLogic(data, players);
                 }
-                if(data.status === "RESULTS") showFinalResults(data);
             });
         }
 
         function startGame() {
             const mode = document.getElementById('select-mode').value;
-            const impTargetCount = parseInt(document.getElementById('select-imp-count').value);
-            db.ref(`games/${myRoom}/players`).once('value', snap => {
-                const playersObj = snap.val();
-                const names = Object.keys(playersObj);
-                if(names.length <= impTargetCount) return alert("Za mało graczy!");
-                
-                const shuffled = names.sort(() => 0.5 - Math.random());
-                const impostors = shuffled.slice(0, impTargetCount);
-                const set = mode === "KARTY" ? POOL_KARTY[Math.floor(Math.random() * POOL_KARTY.length)] : POOL_PYTANIA[Math.floor(Math.random() * POOL_PYTANIA.length)];
-                
-                const updates = { status: "STARTED", mode: mode, set: set, revealed: false };
-                names.forEach(n => {
-                    updates[`players/${n}/isImp`] = impostors.includes(n);
-                    updates[`players/${n}/ans`] = "";
+            if(mode === "THE_TEST") {
+                // Wybieramy 2 losowe pytania na tę rundę
+                const qIndices = [
+                    Math.floor(Math.random() * TEST_QUESTIONS.length),
+                    Math.floor(Math.random() * TEST_QUESTIONS.length)
+                ];
+                db.ref(`games/${myRoom}`).update({ 
+                    status: "STARTED_TEST", 
+                    qIndices: qIndices,
+                    activePlayerIdx: 0, // Zaczyna host
+                    step: "ASKING" // Najpierw Gracz A odpowiada o sobie
                 });
-                db.ref(`games/${myRoom}`).update(updates);
+            }
+        }
+
+        function runTheTestLogic(data, players) {
+            showScreen('screen-the-test');
+            const activePlayer = players[data.activePlayerIdx];
+            const otherPlayer = players[1 - data.activePlayerIdx];
+            const q = TEST_QUESTIONS[data.qIndices[0]]; // Na razie jedno pytanie dla przykładu uproszczenia
+
+            if(data.step === "ASKING") {
+                if(myName === activePlayer) {
+                    document.getElementById('test-title').innerText = "Twoja kolej!";
+                    document.getElementById('test-instruction').innerText = "Odpowiedz szczerze na pytanie:";
+                    renderOptions(q);
+                } else {
+                    document.getElementById('test-title').innerText = "Czekaj...";
+                    document.getElementById('test-instruction').innerText = `${activePlayer} teraz odpowiada o sobie...`;
+                    document.getElementById('question-box').classList.add('hidden');
+                }
+            } else if(data.step === "GUESSING") {
+                if(myName === otherPlayer) {
+                    document.getElementById('test-title').innerText = "Zgaduj!";
+                    document.getElementById('test-instruction').innerText = `Jak myślisz, co wybrał ${activePlayer}?`;
+                    renderOptions(q);
+                } else {
+                    document.getElementById('test-title').innerText = "Czekaj...";
+                    document.getElementById('test-instruction').innerText = `${otherPlayer} próbuje zgadnąć Twoją odpowiedź...`;
+                    document.getElementById('question-box').classList.add('hidden');
+                }
+            } else if(data.step === "RESULT") {
+                showResults(data, players);
+            }
+        }
+
+        function renderOptions(q) {
+            document.getElementById('question-box').classList.remove('hidden');
+            document.getElementById('q-text').innerText = q.q;
+            const area = document.getElementById('options-area');
+            area.innerHTML = "";
+            q.options.forEach(opt => {
+                const b = document.createElement('button');
+                b.className = "option-btn";
+                b.innerText = opt;
+                b.onclick = () => {
+                    selectedOption = opt;
+                    document.querySelectorAll('.option-btn').forEach(x => x.classList.remove('selected'));
+                    b.classList.add('selected');
+                    document.getElementById('btn-next-test').classList.remove('hidden');
+                };
+                area.appendChild(b);
             });
         }
 
-        function sendAnswer() {
-            const val = document.getElementById('answer-input').value.trim();
-            if(!val) return;
-            db.ref(`games/${myRoom}/players/${myName}`).update({ ans: val }).then(() => {
-                document.getElementById('btn-send-ans').classList.add('hidden');
-                document.getElementById('sent-msg').classList.remove('hidden');
-                checkFinish();
-            });
-        }
-
-        function checkFinish() {
-            db.ref(`games/${myRoom}`).once('value', snap => {
+        function nextTestStep() {
+            const ref = db.ref(`games/${myRoom}`);
+            ref.once('value').then(snap => {
                 const data = snap.val();
-                const p = Object.values(data.players);
-                if(p.every(x => x.ans !== "")) db.ref(`games/${myRoom}`).update({ status: "RESULTS" });
+                if(data.step === "ASKING") {
+                    ref.update({ step: "GUESSING", answerA: selectedOption });
+                } else if(data.step === "GUESSING") {
+                    ref.update({ step: "RESULT", answerB: selectedOption });
+                }
+                document.getElementById('btn-next-test').classList.add('hidden');
             });
         }
 
-        function showFinalResults(data) {
+        function showResults(data, players) {
             showScreen('screen-results');
-            const area = document.getElementById('results-area');
-            const revealSection = document.getElementById('reveal-section');
-            const q = data.mode === "PYTANIA" ? `Pytanie: ${data.set.CREWMATE}` : `Hasło: ${data.set.word}`;
-            area.innerHTML = `<h4>${q}</h4><hr>`;
-            Object.values(data.players).forEach(p => {
-                let roleTag = (data.revealed && p.isImp) ? ` <span class="reveal-text">[IMPOSTOR]</span>` : "";
-                area.innerHTML += `<p><b>${p.name}:</b> ${p.ans}${roleTag}</p>`;
-            });
-            if(isHost && !data.revealed) revealSection.classList.remove('hidden');
-            else revealSection.classList.add('hidden');
+            const resArea = document.getElementById('results-area');
+            const match = data.answerA === data.answerB;
+            resArea.innerHTML = `
+                <div class="result-box ${match ? 'match' : 'miss'}">
+                    ${match ? "ZGODNOŚĆ! ✅" : "BRAK ZGODNOŚCI ❌"}
+                </div>
+                <p>${players[data.activePlayerIdx]} wybrał: <b>${data.answerA}</b></p>
+                <p>${players[1-data.activePlayerIdx]} zgadywał: <b>${data.answerB}</b></p>
+            `;
         }
 
-        function revealImpostor() { db.ref(`games/${myRoom}`).update({ revealed: true }); }
-        function exitGame() { if(isHost) db.ref(`games/${myRoom}`).remove().then(() => location.reload()); else location.reload(); }
+        function resetGame() { location.reload(); }
         function showScreen(id) {
             document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
