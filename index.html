@@ -3,96 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MultiGame Online</title>
+    <title>The Test: Evolution 🧬</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        :root { --bg: #121212; --card: #1e1e1e; --primary: #007bff; --secondary: #6f42c1; --success: #28a745; --danger: #dc3545; }
-        body { background-color: var(--bg); font-family: 'Segoe UI', sans-serif; color: #fff; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { background: var(--card); padding: 30px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); text-align: center; width: 90%; max-width: 450px; border: 1px solid #333; }
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --success: #22c55e; --xp: #f59e0b; --text: #f8fafc; }
+        body { background: var(--bg); font-family: 'Segoe UI', Tahoma, sans-serif; color: var(--text); margin: 0; display: flex; justify-content: center; min-height: 100vh; }
+        .container { width: 95%; max-width: 500px; padding: 20px; }
+        .card { background: var(--card); padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); margin-bottom: 20px; border: 1px solid #334155; text-align: center; }
         .hidden { display: none !important; }
         
-        button { width: 100%; padding: 15px; margin: 8px 0; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 1em; }
-        .btn-blue { background: var(--primary); color: white; }
-        .btn-green { background: var(--success); color: white; }
-        .btn-opt { background: #2a2a2a; color: white; border: 2px solid #444; }
-        input, select { width:100%; padding:12px; margin:10px 0; border-radius:8px; background:#2a2a2a; color:white; border:1px solid #444; box-sizing: border-box; }
-        
-        /* Karty Impostor */
-        .player-card { position: relative; width: 160px; height: 220px; margin: 20px auto; transform-style: preserve-3d; transition: transform 0.6s; cursor: pointer; }
-        .player-card.flipped { transform: rotateY(180deg); }
-        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid #333; padding: 15px; box-sizing: border-box; }
-        .card-front { background: var(--primary); color: white; }
-        .card-back { transform: rotateY(180deg); color: white; text-align: center; }
-        .impostor-bg { background: var(--danger); }
-        .crew-bg { background: var(--success); }
+        /* Progress & Levels */
+        .level-badge { background: var(--xp); color: #000; padding: 6px 18px; border-radius: 50px; font-weight: 800; display: inline-block; margin-bottom: 15px; text-transform: uppercase; font-size: 0.8em; }
+        .xp-bar { width: 100%; height: 12px; background: #334155; border-radius: 6px; margin: 15px 0; overflow: hidden; border: 1px solid #475569; }
+        .xp-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
-        /* Progress Bar The Test */
-        .progress-bar { width: 100%; height: 8px; background: #333; border-radius: 4px; margin: 15px 0; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--primary); transition: width 0.3s; }
-        .reveal-text { color: var(--danger); font-weight: bold; border: 1px dashed var(--danger); padding: 2px; }
+        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 16px; margin: 10px 0; border: none; border-radius: 14px; font-weight: bold; cursor: pointer; transition: transform 0.2s, background 0.2s; font-size: 1em; }
+        button:active { transform: scale(0.98); }
+        .btn-primary { background: var(--accent); color: #0f172a; }
+        .btn-opt { background: #334155; color: white; border: 1px solid #475569; }
+        
+        .game-item { background: #1e293b; border: 2px solid #334155; padding: 15px; border-radius: 16px; margin: 10px 0; cursor: pointer; text-align: left; transition: 0.3s; }
+        .game-item:hover { border-color: var(--accent); background: #263349; }
+        .game-item .badge-turn { float: right; background: var(--success); color: white; padding: 2px 8px; border-radius: 6px; font-size: 0.7em; }
+        
+        .option-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
+        .status-tag { color: var(--accent); font-weight: bold; font-size: 0.9em; margin-top: 15px; display: block; }
     </style>
 </head>
 <body>
 
-    <div id="screen-auth" class="container">
-        <h1 style="color:var(--primary)">Party Game</h1>
-        <input type="text" id="input-name" placeholder="Twoje imię">
-        <input type="text" id="input-room" placeholder="Kod pokoju">
-        <button class="btn-green" onclick="handleAuth('create')">STWÓRZ POKÓJ</button>
-        <button class="btn-blue" onclick="handleAuth('join')">DOŁĄCZ DO GRY</button>
-    </div>
+    <div class="container">
+        <div id="screen-auth" class="card">
+            <h1 style="margin-bottom: 5px;">The Test</h1>
+            <p style="color: #94a3b8; margin-top: 0;">Zsynchronizuj swoją relację</p>
+            <input type="text" id="login-nick" placeholder="Twoje imię / Nick">
+            <input type="password" id="login-pin" placeholder="Twój PIN (np. 1234)">
+            <button class="btn-primary" onclick="handleLogin()">ZALOGUJ / STWÓRZ KONTO</button>
+        </div>
 
-    <div id="screen-lobby" class="container hidden">
-        <h2>Pokój: <span id="room-id-display" style="color:var(--primary)"></span></h2>
-        <div id="playerList" style="margin: 15px 0; color: #aaa;"></div>
-        <div id="host-panel" class="hidden">
-            <label>Wybierz tryb:</label>
-            <select id="select-mode" onchange="toggleImpSettings()">
-                <option value="THE_TEST">THE TEST (2 osoby)</option>
-                <option value="IMPOSTOR_KARTY">IMPOSTOR: KARTY</option>
-                <option value="IMPOSTOR_PYTANIA">IMPOSTOR: PYTANIA</option>
-            </select>
-            <div id="imp-settings" class="hidden">
-                <label>Impostorzy:</label>
-                <select id="select-imp-count"><option value="1">1</option><option value="2">2</option></select>
+        <div id="screen-menu" class="card hidden">
+            <div class="level-badge">Zalogowano jako <span id="display-name">...</span></div>
+            <h3 style="text-align: left; margin-top: 20px;">Twoje aktywne gry:</h3>
+            <div id="games-list"></div>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #334155;">
+                <p style="font-size: 0.9em; color: #94a3b8;">Zacznij nową grę z kimś:</p>
+                <input type="text" id="target-nick" placeholder="Wpisz dokładnie Nick partnera">
+                <button class="btn-primary" onclick="startNewRelation()">ROZPOCZNIJ NOWY TEST</button>
+                <button class="btn-opt" style="margin-top: 20px; color: #94a3b8; font-size: 0.8em;" onclick="logout()">WYLOGUJ SIĘ</button>
             </div>
-            <button class="btn-green" onclick="startGame()">START</button>
         </div>
-        <p id="guest-msg">Czekanie na hosta...</p>
-    </div>
 
-    <div id="screen-imp-karty" class="container hidden">
-        <h3>Twoja Karta:</h3>
-        <div class="player-card" onclick="this.classList.toggle('flipped')">
-            <div class="card-front">ODKRYJ</div>
-            <div id="card-back-content" class="card-back"></div>
+        <div id="screen-game" class="card hidden">
+            <div id="relation-stats">
+                <div class="level-badge" id="rel-level">POZIOM 1</div>
+                <div class="xp-bar"><div id="rel-xp-fill" class="xp-fill"></div></div>
+                <p id="rel-info" style="font-size: 0.8em; color: #94a3b8;"></p>
+            </div>
+            
+            <h2 id="q-text" style="margin: 30px 0 10px 0;">...</h2>
+            <div id="options-area" class="option-grid"></div>
+            
+            <span id="game-status" class="status-tag"></span>
+            <button class="btn-opt" style="margin-top: 30px;" onclick="showMenu()">WRÓĆ DO LISTY GIER</button>
         </div>
-        <button class="btn-opt" onclick="exitGame()">OPUŚĆ</button>
-    </div>
-
-    <div id="screen-imp-pytania" class="container hidden">
-        <h2 id="imp-role-display">Rola</h2>
-        <p id="imp-q-display" style="background:#2a2a2a; padding:15px; border-radius:10px;"></p>
-        <input type="text" id="imp-ans-input" placeholder="Twoja odpowiedź...">
-        <button class="btn-green" id="btn-imp-send" onclick="sendImpAnswer()">WYŚLIJ</button>
-    </div>
-
-    <div id="screen-the-test" class="container hidden">
-        <div class="progress-bar"><div id="test-progress" class="progress-fill" style="width: 0%"></div></div>
-        <h2 id="test-role-title">Twoja kolej</h2>
-        <p id="test-status" style="color: #ffc107;"></p>
-        <p id="test-q-text" style="font-size: 1.2em; font-weight: bold;"></p>
-        <div id="test-options"></div>
-    </div>
-
-    <div id="screen-results" class="container hidden">
-        <h2 id="res-title">Wyniki</h2>
-        <div id="res-content" style="text-align:left; margin: 15px 0;"></div>
-        <div id="host-reveal-btn" class="hidden">
-            <button class="btn-opt" style="border-color:var(--danger)" onclick="revealImp()">ODKRYJ IMPOSTORA</button>
-        </div>
-        <button class="btn-blue" onclick="exitGame()">POWRÓT</button>
     </div>
 
     <script>
@@ -103,159 +79,173 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let myName, myRoom, isHost = false;
+        let currentUser = null;
+        let activeRelId = null;
 
-        // BAZA DANYCH
-        const POOL_KARTY = [{ word: "Lotnisko", hint: "Samolot, Kontrola" }, { word: "Kawa", hint: "Kubek, Pobudzenie" }];
-        const POOL_IMP_PYTANIA = [
-            { name: "Jazda", CREWMATE: "Kto pierwszy spowodowałby wypadek?", IMPOSTOR: "Kto jest najbardziej opanowanym kierowcą?" },
-            { name: "Więzienie", CREWMATE: "Kto najszybciej trafiłby do więzienia?", IMPOSTOR: "Kto ma najbardziej niewinną twarz?" }
+        const QUESTIONS = [
+            { q: "Gdzie widzisz się za 10 lat?", o: ["Własna firma / Kariera", "Podróżowanie po świecie", "Spokojne życie rodzinne"] },
+            { q: "Jaka jest Twoja najgorsza cecha?", o: ["Lenistwo i prokrastynacja", "Brak cierpliwości / Nerwowość", "Zbyt duże gadulstwo"] },
+            { q: "Twój idealny wieczór to:", o: ["Impreza i dużo ludzi", "Cisza, Netflix i jedzenie", "Długi spacer lub sport"] },
+            { q: "Kto z nas ma trudniejszy charakter?", o: ["Zdecydowanie ja", "Druga osoba", "Jesteśmy tak samo trudni"] },
+            { q: "Gdybyśmy wygrali milion, to:", o: ["Inwestujemy w przyszłość", "Wydajemy na marzenia od razu", "Rozdajemy / Pomagamy innym"] },
+            { q: "Czego najbardziej nie lubisz robić?", o: ["Sprzątania / Gotowania", "Wstawania wcześnie rano", "Załatwiania spraw urzędowych"] }
         ];
-        const POOL_TEST = [
-            { q: "Gdzie widzisz się za 10 lat?", o: ["Biznes", "Podróże", "Rodzina"] },
-            { q: "Idealny wieczór?", o: ["Impreza", "Netflix", "Hobby"] }
-        ];
 
-        function handleAuth(mode) {
-            myName = document.getElementById('input-name').value.trim();
-            myRoom = document.getElementById('input-room').value.trim();
-            if(!myName || !myRoom) return alert("Uzupełnij dane!");
-            
-            const ref = db.ref('multigame/' + myRoom);
-            ref.once('value').then(snap => {
-                if(mode==='create') { isHost = true; ref.set({ host: myName, status: "LOBBY" }); }
-                db.ref(`multigame/${myRoom}/players/${myName}`).set({ name: myName, ans: "" });
-                document.getElementById('room-id-display').innerText = myRoom;
-                if(isHost) document.getElementById('host-panel').classList.remove('hidden');
-                showScreen('screen-lobby');
-                startSync();
-            });
-        }
+        // LOGOWANIE
+        function handleLogin() {
+            const nick = document.getElementById('login-nick').value.trim();
+            const pin = document.getElementById('login-pin').value.trim();
+            if(!nick || pin.length < 4) return alert("Podaj Nick i min. 4-cyfrowy PIN");
 
-        function startSync() {
-            db.ref(`multigame/${myRoom}`).on('value', snap => {
-                const data = snap.val(); if(!data) return;
-                const players = data.players || {};
-                document.getElementById('playerList').innerText = "Gracze: " + Object.keys(players).join(", ");
-
-                if(data.status === "STARTED_IMP") {
-                    const me = players[myName];
-                    if(data.mode === "KARTY") {
-                        showScreen('screen-imp-karty');
-                        const card = document.getElementById('card-back-content');
-                        if(me.isImp) {
-                            const hints = data.set.hint.split(',');
-                            card.innerText = "IMPOSTOR\nPodpowiedź: " + (hints[0]);
-                            card.className = "card-back impostor-bg";
-                        } else {
-                            card.innerText = "HASŁO:\n" + data.set.word;
-                            card.className = "card-back crew-bg";
-                        }
-                    } else {
-                        showScreen('screen-imp-pytania');
-                        document.getElementById('imp-role-display').innerText = me.isImp ? "IMPOSTOR" : "ZAŁOGANT";
-                        document.getElementById('imp-q-display').innerText = me.isImp ? data.set.IMPOSTOR : data.set.CREWMATE;
-                    }
-                } 
-                else if(data.status === "STARTED_TEST") {
-                    showScreen('screen-the-test');
-                    updateTestUI(data);
-                }
-                else if(data.status === "RESULTS") showResults(data);
-            });
-        }
-
-        function toggleImpSettings() {
-            const mode = document.getElementById('select-mode').value;
-            document.getElementById('imp-settings').className = mode.includes('IMPOSTOR') ? "" : "hidden";
-        }
-
-        function startGame() {
-            const mode = document.getElementById('select-mode').value;
-            const ref = db.ref(`multigame/${myRoom}`);
-            ref.child('players').once('value', snap => {
-                const pObj = snap.val(); const names = Object.keys(pObj);
-                
-                if(mode.includes('IMPOSTOR')) {
-                    const impCount = parseInt(document.getElementById('select-imp-count').value);
-                    const shuffled = names.sort(() => 0.5 - Math.random());
-                    const imps = shuffled.slice(0, impCount);
-                    const set = mode === "IMPOSTOR_KARTY" ? POOL_KARTY[Math.floor(Math.random()*POOL_KARTY.length)] : POOL_IMP_PYTANIA[Math.floor(Math.random()*POOL_IMP_PYTANIA.length)];
-                    
-                    let updates = { status: "STARTED_IMP", mode: mode.split('_')[1], set: set, revealed: false };
-                    names.forEach(n => { updates[`players/${n}/isImp`] = imps.includes(n); updates[`players/${n}/ans`] = ""; });
-                    ref.update(updates);
+            db.ref('evo_v2/users/' + nick).once('value', snap => {
+                if(snap.exists()) {
+                    if(snap.val().pin === pin) success(nick);
+                    else alert("Błędny PIN dla tego użytkownika!");
                 } else {
-                    ref.update({ status: "STARTED_TEST", qList: POOL_TEST.sort(()=>0.5-Math.random()).slice(0,3), currentRound: 0, step: "ASKING", scores: 0, activeIdx: 0 });
+                    db.ref('evo_v2/users/' + nick).set({ nick, pin }).then(() => success(nick));
                 }
             });
         }
 
-        // LOGIKA THE TEST
-        function updateTestUI(data) {
-            const players = Object.keys(data.players);
-            const active = players[data.activeIdx]; const guesser = players[1-data.activeIdx];
-            const q = data.qList[data.currentRound];
-            document.getElementById('test-progress').style.width = (data.currentRound / data.qList.length * 100) + "%";
-            document.getElementById('test-q-text').innerText = q.q;
-            const optArea = document.getElementById('test-options'); optArea.innerHTML = "";
-
-            if(data.step === "ASKING") {
-                document.getElementById('test-status').innerText = myName === active ? "ODPOWIEDZ O SOBIE" : `Czekaj na ${active}...`;
-                if(myName === active) renderTestOpts(q.o, 'A');
-            } else {
-                document.getElementById('test-status').innerText = myName === guesser ? `CO WYBRAŁ ${active}?` : `Czekaj na ${guesser}...`;
-                if(myName === guesser) renderTestOpts(q.o, 'B');
-            }
+        function success(nick) {
+            currentUser = nick;
+            localStorage.setItem('theTest_v2_nick', nick);
+            showMenu();
         }
 
-        function renderTestOpts(opts, type) {
-            opts.forEach(o => {
-                const b = document.createElement('button'); b.className = "btn-opt"; b.innerText = o;
-                b.onclick = () => {
-                    const ref = db.ref(`multigame/${myRoom}`);
-                    if(type==='A') ref.update({ step: "GUESSING", lastAnsA: o });
-                    else ref.once('value', s => {
-                        const d = s.val();
-                        let score = d.scores + (d.lastAnsA === o ? 1 : 0);
-                        let next = d.currentRound + 1;
-                        if(next >= d.qList.length) ref.update({ status: "RESULTS", scores: score, testFinished: true });
-                        else ref.update({ step: "ASKING", currentRound: next, scores: score });
+        function logout() {
+            localStorage.clear();
+            location.reload();
+        }
+
+        function showMenu() {
+            hideAll();
+            document.getElementById('screen-menu').classList.remove('hidden');
+            document.getElementById('display-name').innerText = currentUser;
+            loadGamesList();
+        }
+
+        // LISTA RELACJI
+        function loadGamesList() {
+            db.ref('evo_v2/relations').on('value', snap => {
+                const list = document.getElementById('games-list');
+                list.innerHTML = "";
+                const data = snap.val() || {};
+                let found = false;
+
+                Object.keys(data).forEach(id => {
+                    if(id.includes(currentUser)) {
+                        found = true;
+                        const rel = data[id];
+                        const partner = id.replace(currentUser, "").replace("_", "");
+                        const isMyTurn = (rel.turn === currentUser);
+                        
+                        const div = document.createElement('div');
+                        div.className = "game-item";
+                        div.innerHTML = `
+                            ${isMyTurn ? '<span class="badge-turn">TWÓJ RUCH</span>' : ''}
+                            <strong>Relacja z: ${partner}</strong><br>
+                            <small style="color: #94a3b8">Poziom ${rel.level} • Zgodność ${rel.total > 0 ? Math.round(rel.correct/rel.total*100) : 0}%</small>
+                        `;
+                        div.onclick = () => openGame(id, partner);
+                        list.appendChild(div);
+                    }
+                });
+                if(!found) list.innerHTML = "<p style='color:#64748b; font-size: 0.9em;'>Nie masz jeszcze żadnych gier. Dodaj kogoś poniżej!</p>";
+            });
+        }
+
+        function startNewRelation() {
+            const target = document.getElementById('target-nick').value.trim();
+            if(!target || target === currentUser) return alert("Podaj poprawny nick partnera!");
+
+            const relId = [currentUser, target].sort().join("_");
+            db.ref('evo_v2/relations/' + relId).once('value', snap => {
+                if(!snap.exists()) {
+                    db.ref('evo_v2/relations/' + relId).set({
+                        level: 1, xp: 0, turn: currentUser, step: "ASKING",
+                        currentQ: Math.floor(Math.random()*QUESTIONS.length),
+                        correct: 0, total: 0
                     });
-                };
-                document.getElementById('test-options').appendChild(b);
+                }
+                openGame(relId, target);
             });
         }
 
-        // IMPOSTOR ANSWERS
-        function sendImpAnswer() {
-            const val = document.getElementById('imp-ans-input').value;
-            db.ref(`multigame/${myRoom}/players/${myName}`).update({ ans: val }).then(() => {
-                document.getElementById('btn-imp-send').classList.add('hidden');
-                db.ref(`multigame/${myRoom}`).once('value', s => {
-                    if(Object.values(s.val().players).every(p => p.ans !== "")) db.ref(`multigame/${myRoom}`).update({ status: "RESULTS" });
+        // GRA
+        function openGame(relId, partner) {
+            activeRelId = relId;
+            hideAll();
+            document.getElementById('screen-game').classList.remove('hidden');
+            
+            db.ref('evo_v2/relations/' + relId).on('value', snap => {
+                const d = snap.val();
+                if(!d || activeRelId !== relId) return;
+
+                // Statystyki
+                document.getElementById('rel-level').innerText = `POZIOM ${d.level}`;
+                document.getElementById('rel-xp-fill').style.width = (d.xp / (d.level * 200) * 100) + "%";
+                document.getElementById('rel-info').innerText = `Zgodność: ${d.correct}/${d.total} poprawnych`;
+
+                const q = QUESTIONS[d.currentQ];
+                const optArea = document.getElementById('options-area');
+                optArea.innerHTML = "";
+
+                if(d.turn === currentUser) {
+                    document.getElementById('q-text').innerText = q.q;
+                    document.getElementById('game-status').innerText = d.step === "ASKING" ? "Pytanie o Ciebie:" : `Co wybrał partner (${partner})?`;
+                    
+                    q.o.forEach(opt => {
+                        const b = document.createElement('button');
+                        b.className = "btn-opt";
+                        b.innerText = opt;
+                        b.onclick = () => handleAction(relId, d, opt, partner);
+                        optArea.appendChild(b);
+                    });
+                } else {
+                    document.getElementById('q-text').innerText = "Czekamy na ruch...";
+                    document.getElementById('game-status').innerText = `Teraz kolej użytkownika ${partner}`;
+                }
+            });
+        }
+
+        function handleAction(relId, data, val, partner) {
+            const ref = db.ref('evo_v2/relations/' + relId);
+            
+            if(data.step === "ASKING") {
+                // Ja odpowiadam o sobie, tura przechodzi na partnera by zgadł
+                ref.update({
+                    lastAns: val,
+                    step: "GUESSING",
+                    turn: partner
                 });
-            });
-        }
-
-        function showResults(data) {
-            showScreen('screen-results');
-            const area = document.getElementById('res-content'); area.innerHTML = "";
-            if(data.testFinished) {
-                const pct = Math.round(data.scores / data.qList.length * 100);
-                area.innerHTML = `<h1 style="text-align:center">${pct}%</h1><p style="text-align:center">Zgodności!</p>`;
             } else {
-                if(isHost && !data.revealed) document.getElementById('host-reveal-btn').classList.remove('hidden');
-                Object.values(data.players).forEach(p => {
-                    let role = (data.revealed && p.isImp) ? `<span class="reveal-text">IMP</span>` : "";
-                    area.innerHTML += `<p><b>${p.name}:</b> ${p.ans} ${role}</p>`;
+                // Ja zgaduję co wybrał partner
+                const match = (data.lastAns === val);
+                let xp = data.xp + (match ? 60 : 15);
+                let lvl = data.level;
+                if(xp >= lvl * 200) { xp = 0; lvl++; }
+
+                ref.update({
+                    xp: xp,
+                    level: lvl,
+                    correct: data.correct + (match ? 1 : 0),
+                    total: data.total + 1,
+                    currentQ: Math.floor(Math.random() * QUESTIONS.length),
+                    step: "ASKING",
+                    turn: partner // Teraz partner odpowiada o sobie
                 });
+                alert(match ? "TRAFIONE! +60 XP ✨" : "PUDŁO! Ale i tak dostajecie +15 XP za próbę. 🙃");
             }
         }
 
-        function revealImp() { db.ref(`multigame/${myRoom}`).update({ revealed: true }); }
-        function exitGame() { location.reload(); }
-        function showScreen(id) { document.querySelectorAll('.container').forEach(c => c.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+        function hideAll() {
+            document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+        }
+
+        // Auto-login
+        const saved = localStorage.getItem('theTest_v2_nick');
+        if(saved) { currentUser = saved; showMenu(); }
     </script>
 </body>
 </html>
