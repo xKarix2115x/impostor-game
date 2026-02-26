@@ -417,7 +417,29 @@
         // 🧬 DANE: THE TEST
         // ==========================================
         const TEST_QUESTIONS = [
-            { q: "Ulubiony sposób na relaks?", o: ["Sen", "Serial", "Sport"] },
+            { q: "Ulubiony sposób na relaks?", o: ["Sen", "Serial", "Sport"], type: "select" },
+            { q: "Jaki jest mój ulubiony sposób na spędzanie wolnego czasu?", o: ["Oglądanie seriali/filmów", "Wyjście ze znajomymi", "Sport lub hobby"], type: "select" },
+            { q: "Gdybym mógł/mogła zjeść tylko jedną rzecz do końca życia, co by to było?", o: ["Pizza", "Kebab", "Domowy obiad"], type: "select" },
+            { q: "Czego najbardziej nie lubię robić w domu?", o: ["Zmywać naczyń", "Sprzątać", "Wynosić śmieci"], type: "select" },
+            { q: "Jaki jest mój wymarzony kierunek podróży?", o: ["Egzotyczna plaża", "Europejska stolica", "Góry lub dzika natura"], type: "select" },
+            { q: "Jaki był/jest mój ulubiony przedmiot w szkole?", o: ["Języki obce / polski", "Matematyka / ścisłe", "WF"], type: "select" },
+            { q: "Co mnie najbardziej irytuje u innych ludzi?", o: ["Spóźnialstwo", "Kłamanie", "Głośne zachowanie"], type: "select" },
+            { q: "W jakiej sytuacji najczęściej tracę cierpliwość?", o: ["Gdy coś mi nie wychodzi", "Gdy ktoś robi coś czego nie chce", "Gdy jestem głodny/a lub niewyspany/a"], type: "select" },
+            { q: "Kim chciałem/am zostać, jak byłem/am mały/a?", o: ["Piosenkarzem/ką lub Aktorem/ką", "Lekarzem/ką lub Weterynarzem", "Nauczycielem/ką"], type: "select" },
+            { q: "Jaki jest mój styl ubierania się na co dzień?", o: ["Typowy dresiarz / oversize", "Elegancko i dopasowanie", "Casual (dżinsy i t-shirt)"], type: "select" },
+            { q: "Która cecha Twojego charakteru najbardziej mnie czasem denerwuje?", o: ["Upartość", "Toksyczność", "Głupota"], type: "select" },
+            { q: "Jaka jest twoja ulubiona piosenka?", type: "input" },
+            { q: "Ulubiony wykonawca muzyczny?", type: "input" },
+            { q: "Najlepszy gatunek muzyczny?", o: ["Rap", "Disco Polo", "Hip-hop"], type: "select" },
+            { q: "Ulubiona pora dnia drugiej osoby?", type: "input" },
+            { q: "Czego druga osoba słucha najczęściej?", type:"input" },
+            { q: "Ulubiony napój procentowy?",type:"input" },
+            { q: "?", o: ["", "", ""] },
+            { q: "?", o: ["", "", ""] },
+            { q: "?", o: ["", "", ""] },
+            { q: "?", o: ["", "", ""] },
+            { q: "?", o: ["", "", ""] },
+            { q: "?", o: ["", "", ""] },
             { q: "Kto pierwszy wyciąga rękę po kłótni?", o: ["Ja", "Ty", "Zależy"] }
         ];
 
@@ -524,23 +546,21 @@
             const id = [myNick, t].sort().join("_");
             db.ref('test_v6/rels/' + id).set({ level: 1, xp: 0, turn: myNick, step: 'ASKING', idx: 0, pack: [0, 1].map(() => Math.floor(Math.random() * TEST_QUESTIONS.length)), ans: [], gus: [] });
         }
-        function openTestGame(id, partner) {
-            activeTestRelId = id; nav('screen-test-play');
-            db.ref('test_v6/rels/' + id).on('value', s => {
-                const d = s.val(); if (!d || activeTestRelId !== id) return;
-                if (d.step === 'REVEAL' && d.turn === myNick) { showTestReveal(d); return; }
-                document.getElementById('test-lvl').innerText = "POZIOM " + d.level;
-                document.getElementById('test-xp-f').style.width = (d.xp / (d.level * 300) * 100) + "%";
-                const banner = document.getElementById('test-action-banner');
-                const qArea = document.getElementById('test-options'); qArea.innerHTML = "";
-                if (d.turn === myNick) {
-                    const qObj = TEST_QUESTIONS[d.pack[d.idx]]; document.getElementById('test-q').innerText = qObj.q;
-                    banner.className = d.step === 'ASKING' ? 'status-asking' : 'status-guessing';
-                    banner.innerText = d.step === 'ASKING' ? "📋 Odpowiedz o sobie" : `🎯 Co wybrał(a) ${partner}?`;
-                    qObj.o.forEach(o => { const b = document.createElement('button'); b.className = "action-btn"; b.innerText = o; b.onclick = () => handleTestMove(id, d, o, partner); qArea.appendChild(b); });
-                } else { banner.className = ""; banner.innerText = "⏳ CZEKAJ..."; document.getElementById('test-q').innerText = `Ruch partnera (${partner})`; }
-                const dots = document.getElementById('test-dots'); dots.innerHTML = "";
-                for (let i = 0; i < d.pack.length; i++) { const dot = document.createElement('div'); dot.style.cssText = `width:30px; height:5px; border-radius:5px; background:${i < d.idx ? 'var(--success)' : (i === d.idx ? 'var(--accent)' : '#334155')}`; dots.appendChild(dot); }
+        
+
+        // Sprawdzenie: czy pytanie jest otwarte (input) czy zamknięte (select)
+        if (qObj.type === "input") {
+            qArea.innerHTML = `
+        <input type="text" id="test-custom-ans" placeholder="Wpisz odpowiedź...">
+        <button class="action-btn" onclick="const v = document.getElementById('test-custom-ans').value; if(v) handleTestMove('${id}', ${JSON.stringify(d).replace(/"/g, '&quot;')}, v, '${partner}')">WYŚLIJ</button>
+    `;
+        } else {
+            qObj.o.forEach(o => {
+                const b = document.createElement('button');
+                b.className = "action-btn";
+                b.innerText = o;
+                b.onclick = () => handleTestMove(id, d, o, partner);
+                qArea.appendChild(b);
             });
         }
         function handleTestMove(id, data, val, partner) {
@@ -555,10 +575,24 @@
                 else ref.update({ gus: g, idx: data.idx + 1 });
             }
         }
-        function showTestReveal(d) {
-            nav('screen-test-reveal'); const list = document.getElementById('test-rev-list'); list.innerHTML = "";
-            d.pack.forEach((qi, i) => { const m = d.ans[i] === d.gus[i]; list.innerHTML += `<div class="reveal-item" style="border-left-color:${m ? 'var(--success)' : 'var(--danger)'}"><small>${TEST_QUESTIONS[qi].q}</small><br><strong>${d.ans[i]}</strong> ${m ? '✅' : '❌'}</div>`; });
-        }
+        d.pack.forEach((qi, i) => {
+            // Sprawdzanie dopasowania ignorując wielkość liter i spacje (ważne przy wpisywaniu ręcznym)
+            const valAns = String(d.ans[i] || "").trim().toLowerCase();
+            const valGus = String(d.gus[i] || "").trim().toLowerCase();
+            const isMatch = valAns === valGus;
+
+            list.innerHTML += `
+        <div class="reveal-item" style="border-left-color:${isMatch ? 'var(--success)' : 'var(--danger)'}">
+            <small>${TEST_QUESTIONS[qi].q}</small><br>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+                <span>
+                    <b style="color:var(--accent)">Odp:</b> ${d.ans[i]}<br>
+                    <b style="color:var(--xp)">Strzał:</b> ${d.gus[i]}
+                </span>
+                <span style="font-size:1.2rem">${isMatch ? '✅' : '❌'}</span>
+            </div>
+        </div>`;
+        });
         function testConfirmReveal() {
             const ref = db.ref('test_v6/rels/' + activeTestRelId);
             ref.once('value', s => {
