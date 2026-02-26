@@ -516,9 +516,14 @@
         function leaveImpostor() { db.ref('impostor_v8/' + activeRoom).off(); nav('screen-launcher'); }
 
         // THE TEST LOGIC
-        function handleTestAutoLogin() { const s = localStorage.getItem('kamil_test_nick'); if (s) { myNick = s; enterTestDash(); } else nav('screen-test-auth'); }
+        function handleTestAutoLogin() {
+            const s = localStorage.getItem('kamil_test_nick');
+            if (s) { myNick = s; enterTestDash(); } else nav('screen-test-auth');
+        }
+
         function testLogin() {
-            myNick = document.getElementById('test-nick').value.trim(); const pin = document.getElementById('test-pin').value.trim();
+            myNick = document.getElementById('test-nick').value.trim();
+            const pin = document.getElementById('test-pin').value.trim();
             if (!myNick || pin.length < 4) return alert("Nick i PIN!");
             db.ref('test_v6/users/' + myNick).once('value', s => {
                 if (s.exists() && s.val().pin !== pin) return alert("Błędny PIN!");
@@ -526,8 +531,10 @@
                 localStorage.setItem('kamil_test_nick', myNick); enterTestDash();
             });
         }
+
         function enterTestDash() {
-            nav('screen-test-dash'); document.getElementById('test-user-name').innerText = "Cześć, " + myNick;
+            nav('screen-test-dash');
+            document.getElementById('test-user-name').innerText = "Cześć, " + myNick;
             db.ref('test_v6/rels').on('value', s => {
                 const list = document.getElementById('test-list'); list.innerHTML = "";
                 const data = s.val() || {};
@@ -536,73 +543,140 @@
                         const partner = id.replace(myNick, "").replace("_", "");
                         const d = document.createElement('div'); d.className = "main-btn";
                         d.innerHTML = `<strong>${partner}</strong> ${data[id].turn === myNick ? '<span style="float:right;color:var(--success)">TWÓJ RUCH</span>' : ''}`;
-                        d.onclick = () => openTestGame(id, partner); list.appendChild(d);
+                        d.onclick = () => openTestGame(id, partner);
+                        list.appendChild(d);
                     }
                 });
             });
         }
+
         function newTestRel() {
-            const t = document.getElementById('test-target').value.trim(); if (!t || t === myNick) return;
+            const t = document.getElementById('test-target').value.trim();
+            if (!t || t === myNick) return;
             const id = [myNick, t].sort().join("_");
             db.ref('test_v6/rels/' + id).set({ level: 1, xp: 0, turn: myNick, step: 'ASKING', idx: 0, pack: [0, 1].map(() => Math.floor(Math.random() * TEST_QUESTIONS.length)), ans: [], gus: [] });
         }
-        
 
-        // Sprawdzenie: czy pytanie jest otwarte (input) czy zamknięte (select)
-        if (qObj.type === "input") {
-            qArea.innerHTML = `
-        <input type="text" id="test-custom-ans" placeholder="Wpisz odpowiedź...">
-        <button class="action-btn" onclick="const v = document.getElementById('test-custom-ans').value; if(v) handleTestMove('${id}', ${JSON.stringify(d).replace(/"/g, '&quot;')}, v, '${partner}')">WYŚLIJ</button>
-    `;
-        } else {
-            qObj.o.forEach(o => {
-                const b = document.createElement('button');
-                b.className = "action-btn";
-                b.innerText = o;
-                b.onclick = () => handleTestMove(id, d, o, partner);
-                qArea.appendChild(b);
+        function openTestGame(id, partner) {
+            activeTestRelId = id; nav('screen-test-play');
+            db.ref('test_v6/rels/' + id).on('value', s => {
+                const d = s.val(); if (!d || activeTestRelId !== id) return;
+
+                if (d.step === 'REVEAL' && d.turn === myNick) { showTestReveal(d); return; }
+
+                document.getElementById('test-lvl').innerText = "POZIOM " + d.level;
+                document.getElementById('test-xp-f').style.width = (d.xp / (d.level * 300) * 100) + "%";
+                const banner = document.getElementById('test-action-banner');
+                const qArea = document.getElementById('test-options'); qArea.innerHTML = "";
+
+                if (d.turn === myNick) {
+                    const qObj = TEST_QUESTIONS[d.pack[d.idx]];
+                    document.getElementById('test-q').innerText = qObj.q;
+                    banner.className = d.step === 'ASKING' ? 'status-asking' : 'status-guessing';
+                    banner.innerText = d.step === 'ASKING' ? "📋 Odpowiedz o sobie" : `🎯 Co wybrał(a) ${partner}?`;
+
+                    if (qObj.type === "input") {
+                        qArea.innerHTML = `
+                    <input type="text" id="test-custom-ans" placeholder="Wpisz odpowiedź...">
+                    <button class="action-btn" onclick="const v = document.getElementById('test-custom-ans').value; if(v) handleTestMove('${id}', ${JSON.stringify(d).replace(/"/g, '&quot;')}, v, '${partner}')">WYŚLIJ</button>
+                `;
+                    } else {
+                        qObj.o.forEach(o => {
+                            const b = document.createElement('button'); b.className = "action-btn"; b.innerText = o;
+                            b.onclick = () => handleTestMove(id, d, o, partner);
+                            qArea.appendChild(b);
+                        });
+                    }
+                } else {
+                    banner.className = ""; banner.innerText = "⏳ CZEKAJ...";
+                    document.getElementById('test-q').innerText = `Ruch partnera (${partner})`;
+                }
+
+                const dots = document.getElementById('test-dots'); dots.innerHTML = "";
+                for (let i = 0; i < d.pack.length; i++) {
+                    const dot = document.createElement('div');
+                    dot.style.cssText = `width:30px; height:5px; border-radius:5px; background:${i < d.idx ? 'var(--success)' : (i === d.idx ? 'var(--accent)' : '#334155')}`;
+                    dots.appendChild(dot);
+                }
             });
         }
+
         function handleTestMove(id, data, val, partner) {
             const ref = db.ref('test_v6/rels/' + id);
             if (data.step === 'ASKING') {
                 let a = data.ans || []; a.push(val);
-                if (a.length >= data.pack.length) ref.update({ ans: a, step: 'GUESSING', idx: 0, turn: partner });
-                else ref.update({ ans: a, idx: data.idx + 1 });
+                if (a.length >= data.pack.length) {
+                    ref.update({ ans: a, step: 'GUESSING', idx: 0, turn: partner });
+                } else {
+                    ref.update({ ans: a, idx: data.idx + 1 });
+                }
             } else {
                 let g = data.gus || []; g.push(val);
-                if (g.length >= data.pack.length) ref.update({ gus: g, step: 'REVEAL' });
-                else ref.update({ gus: g, idx: data.idx + 1 });
+                if (g.length >= data.pack.length) {
+                    ref.update({ gus: g, step: 'REVEAL', turn: partner });
+                } else {
+                    ref.update({ gus: g, idx: data.idx + 1 });
+                }
             }
         }
-        d.pack.forEach((qi, i) => {
-            // Sprawdzanie dopasowania ignorując wielkość liter i spacje (ważne przy wpisywaniu ręcznym)
-            const valAns = String(d.ans[i] || "").trim().toLowerCase();
-            const valGus = String(d.gus[i] || "").trim().toLowerCase();
-            const isMatch = valAns === valGus;
 
-            list.innerHTML += `
-        <div class="reveal-item" style="border-left-color:${isMatch ? 'var(--success)' : 'var(--danger)'}">
+        function showTestReveal(d) {
+            nav('screen-test-reveal');
+            const list = document.getElementById('test-rev-list');
+            const partnerNick = activeTestRelId.replace(myNick, "").replace("_", "");
+            list.innerHTML = `<h3>Weryfikacja</h3><p style="font-size:0.7rem; margin-bottom:15px; opacity:0.8">Zaznacz poprawne strzały gracza ${partnerNick}.</p>`;
+            window.tempMatches = [];
+
+            d.pack.forEach((qi, i) => {
+                const isMatch = String(d.ans[i] || "").trim().toLowerCase() === String(d.gus[i] || "").trim().toLowerCase();
+                window.tempMatches[i] = isMatch;
+
+                const item = document.createElement('div');
+                item.className = "reveal-item";
+                item.style.borderLeft = isMatch ? "4px solid var(--success)" : "4px solid var(--danger)";
+                item.style.cursor = "pointer";
+                item.onclick = () => {
+                    window.tempMatches[i] = !window.tempMatches[i];
+                    item.style.borderLeft = window.tempMatches[i] ? "4px solid var(--success)" : "4px solid var(--danger)";
+                    document.getElementById(`status-text-${i}`).innerText = window.tempMatches[i] ? 'UZNANE ✅' : 'ODRZUCONE ❌';
+                    document.getElementById(`status-text-${i}`).style.color = window.tempMatches[i] ? 'var(--success)' : 'var(--danger)';
+                };
+
+                item.innerHTML = `
             <small>${TEST_QUESTIONS[qi].q}</small><br>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
-                <span>
-                    <b style="color:var(--accent)">Odp:</b> ${d.ans[i]}<br>
-                    <b style="color:var(--xp)">Strzał:</b> ${d.gus[i]}
-                </span>
-                <span style="font-size:1.2rem">${isMatch ? '✅' : '❌'}</span>
+            <div style="margin-top:5px; font-size:0.9rem">
+                <b>Twoja:</b> <span style="color:var(--accent)">${d.ans[i]}</span><br>
+                <b>Strzał:</b> <span style="color:var(--xp)">${d.gus[i]}</span>
             </div>
-        </div>`;
-        });
+            <div id="status-text-${i}" style="text-align:right; font-weight:800; font-size:0.7rem; color:${isMatch ? 'var(--success)' : 'var(--danger)'}">
+                ${isMatch ? 'UZNANE ✅' : 'ODRZUCONE ❌'}
+            </div>
+        `;
+                list.appendChild(item);
+            });
+        }
+
         function testConfirmReveal() {
             const ref = db.ref('test_v6/rels/' + activeTestRelId);
             ref.once('value', s => {
                 const d = s.val(); let matches = 0;
-                let hist = d.pack.map((qi, i) => { const m = d.ans[i] === d.gus[i]; if (m) matches++; return { q: TEST_QUESTIONS[qi].q, a: d.ans[i], m }; });
-                let xp = d.xp + (matches * 100) + 20; let lvl = d.level; if (xp >= lvl * 300) { xp = 0; lvl++; }
-                ref.update({ level: lvl, xp, last: hist, ans: [], gus: [], idx: 0, step: 'ASKING', turn: myNick, pack: [0, 1].map(() => Math.floor(Math.random() * TEST_QUESTIONS.length)) });
+                const partnerNick = activeTestRelId.replace(myNick, "").replace("_", "");
+                let hist = d.pack.map((qi, i) => {
+                    const m = window.tempMatches[i]; if (m) matches++;
+                    return { q: TEST_QUESTIONS[qi].q, a: d.ans[i], m: m };
+                });
+                let xp = d.xp + (matches * 100) + 20; let lvl = d.level;
+                if (xp >= lvl * 300) { xp = 0; lvl++; }
+                ref.update({
+                    level: lvl, xp, last: hist, ans: [], gus: [], idx: 0,
+                    step: 'ASKING', turn: partnerNick,
+                    pack: [0, 1].map(() => Math.floor(Math.random() * TEST_QUESTIONS.length))
+                });
                 nav('screen-test-dash');
             });
         }
+
+        function testLogout() { localStorage.clear(); nav('screen-launcher'); }
         function testLogout() { localStorage.clear(); nav('screen-launcher'); }
     </script>
 </body>
