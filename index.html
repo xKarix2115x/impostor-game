@@ -18,10 +18,7 @@
             --xp: #fbbf24;
         }
 
-        * {
-            box-sizing: border-box;
-        }
-        /* Kluczowa poprawka ramek */
+        * { box-sizing: border-box; }
         body {
             background: radial-gradient(circle at top right, #1e1b4b, #080b14);
             font-family: 'Outfit', sans-serif;
@@ -32,12 +29,7 @@
             min-height: 100vh;
         }
 
-        .container {
-            width: 100%;
-            max-width: 450px;
-            padding: 20px;
-        }
-
+        .container { width: 100%; max-width: 450px; padding: 20px; }
         .card {
             background: var(--card);
             backdrop-filter: blur(10px);
@@ -49,138 +41,23 @@
             width: 100%;
         }
 
-        .hidden {
-            display: none !important;
-        }
+        .hidden { display: none !important; }
+        h1 { font-size: 3.5rem; margin: 0; font-weight: 800; }
+        .subtitle { color: var(--accent); text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem; margin-bottom: 30px; }
+        input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: #0f172a; color: white; outline: none; }
+        button.action-btn { width: 100%; padding: 16px; border-radius: 16px; border: none; font-weight: bold; background: var(--accent); color: #080b14; cursor: pointer; margin-top: 10px; }
+        .main-btn { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 25px; border-radius: 24px; margin-bottom: 15px; cursor: pointer; width: 100%; color: white; text-align: left; display: block; }
+        
+        .mode-select { display: flex; gap: 10px; margin: 10px 0; }
+        .mode-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--accent); background: none; color: white; cursor: pointer; font-size: 0.7rem; }
+        .mode-btn.active { background: var(--accent); color: #080b14; }
 
-        h1 {
-            font-size: 3.5rem;
-            margin: 0;
-            font-weight: 800;
-        }
-
-        .subtitle {
-            color: var(--accent);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 0.8rem;
-            margin-bottom: 30px;
-        }
-
-        input {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: #0f172a;
-            color: white;
-            outline: none;
-        }
-
-        button.action-btn {
-            width: 100%;
-            padding: 16px;
-            border-radius: 16px;
-            border: none;
-            font-weight: bold;
-            background: var(--accent);
-            color: #080b14;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .main-btn {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 25px;
-            border-radius: 24px;
-            margin-bottom: 15px;
-            cursor: pointer;
-            width: 100%;
-            color: white;
-            text-align: left;
-            display: block;
-        }
-
-        .mode-select {
-            display: flex;
-            gap: 10px;
-            margin: 10px 0;
-        }
-
-        .mode-btn {
-            flex: 1;
-            padding: 10px;
-            border-radius: 10px;
-            border: 1px solid var(--accent);
-            background: none;
-            color: white;
-            cursor: pointer;
-            font-size: 0.7rem;
-        }
-
-            .mode-btn.active {
-                background: var(--accent);
-                color: #080b14;
-            }
-
-        .hint-toggle {
-            margin: 15px 0;
-            padding: 10px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-
-        #test-action-banner {
-            padding: 12px;
-            border-radius: 14px;
-            margin-bottom: 20px;
-            font-weight: 800;
-            text-transform: uppercase;
-            font-size: 0.7rem;
-        }
-
-        .status-asking {
-            background: rgba(56, 189, 248, 0.15);
-            color: var(--accent);
-            border: 1px solid var(--accent);
-        }
-
-        .status-guessing {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--success);
-            border: 1px solid var(--success);
-        }
-
-        .xp-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-
-        .xp-fill {
-            height: 100%;
-            background: var(--xp);
-            transition: width 0.5s;
-        }
-
-        .reveal-item {
-            background: rgba(0,0,0,0.2);
-            padding: 12px;
-            border-radius: 15px;
-            margin-top: 8px;
-            text-align: left;
-            border-left: 4px solid #444;
-        }
+        #test-action-banner { padding: 12px; border-radius: 14px; margin-bottom: 20px; font-weight: 800; text-transform: uppercase; font-size: 0.7rem; }
+        .status-asking { background: rgba(56, 189, 248, 0.15); color: var(--accent); border: 1px solid var(--accent); }
+        .status-guessing { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid var(--success); }
+        .xp-bar { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; margin: 10px 0; overflow: hidden; }
+        .xp-fill { height: 100%; background: var(--xp); transition: width 0.5s; }
+        .reveal-item { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 15px; margin-top: 8px; text-align: left; border-left: 4px solid #444; }
     </style>
 </head>
 <body>
@@ -200,10 +77,6 @@
                 <button class="mode-btn active" id="btn-m-w" onclick="setImpMode('words')">HASŁA</button>
                 <button class="mode-btn" id="btn-m-q" onclick="setImpMode('questions')">PYTANIA</button>
             </div>
-            <div id="hint-option-box" class="hint-toggle" onclick="toggleHints()">
-                <span>Podpowiedzi (Tryb Haseł)</span>
-                <span id="hint-status" style="color:var(--danger); font-weight:800;">OFF</span>
-            </div>
             <button class="action-btn" onclick="startImpostor(true)">STWÓRZ POKÓJ</button>
             <button class="action-btn" style="background:#334155; color:white;" onclick="startImpostor(false)">DOŁĄCZ</button>
             <p onclick="nav('screen-launcher')" style="cursor:pointer; opacity:0.6; margin-top:20px;">← Powrót</p>
@@ -218,260 +91,66 @@
             </div>
             <div id="imp-role-card" class="hidden">
                 <h2 id="role-title">Twoja rola</h2>
-                <div id="role-value" style="font-size: 1.5rem; color: var(--accent); margin: 25px 0; font-weight: 800; border: 2px dashed var(--accent); padding: 15px; border-radius: 15px;"></div>
-                <p id="role-desc" style="font-size: 0.9rem; opacity: 0.8;"></p>
+                <div id="role-value"></div>
+                
+                <div id="imp-answer-section" class="hidden">
+                    <input type="text" id="imp-answer-input" placeholder="Twoja odpowiedź...">
+                    <button class="action-btn" id="imp-send-btn" onclick="submitImpAnswer()">WYŚLIJ</button>
+                </div>
+
+                <div id="imp-results-area" class="hidden" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;">
+                    <p class="subtitle">Odpowiedzi:</p>
+                    <div id="imp-all-answers"></div>
+                </div>
+
+                <p id="role-desc" style="font-size: 0.9rem; opacity: 0.8; margin-top: 20px;"></p>
             </div>
             <button class="action-btn" style="background:#551a1a; color:white; margin-top:40px;" onclick="leaveImpostor()">Wyjdź</button>
         </div>
 
         <div id="screen-test-auth" class="card hidden"><h2>The Test</h2><input type="text" id="test-nick" placeholder="Nick"><input type="password" id="test-pin" placeholder="PIN"><button class="action-btn" onclick="testLogin()">ZALOGUJ</button></div>
         <div id="screen-test-dash" class="card hidden"><div style="display:flex; justify-content:space-between;"><h3 id="test-user-name"></h3><span onclick="nav('screen-launcher')" style="color:var(--accent); cursor:pointer">MENU</span></div><div id="test-list"></div><input type="text" id="test-target" placeholder="Nick partnera"><button class="action-btn" onclick="newTestRel()">+ RELACJA</button></div>
-        <div id="screen-test-play" class="card hidden"><div id="test-lvl" class="subtitle"></div><div class="xp-bar"><div id="test-xp-f" class="xp-fill"></div></div><div id="test-dots" style="display:flex; justify-content:center; gap:5px; margin:15px 0;"></div><div id="test-action-banner"></div><h2 id="test-q"></h2><div id="test-options"></div><div id="test-history" class="hidden"><div id="test-hist-list"></div></div></div>
+        <div id="screen-test-play" class="card hidden"><div id="test-lvl" class="subtitle"></div><div class="xp-bar"><div id="test-xp-f" class="xp-fill"></div></div><div id="test-dots" style="display:flex; justify-content:center; gap:5px; margin:15px 0;"></div><div id="test-action-banner"></div><h2 id="test-q"></h2><div id="test-options"></div></div>
         <div id="screen-test-reveal" class="card hidden"><h2>Wyniki!</h2><div id="test-rev-list"></div><button class="action-btn" onclick="testConfirmReveal()">DALEJ</button></div>
     </div>
 
     <script>
-        // ==========================================
-        // 🟢 DANE: IMPOSTOR (HASŁA)
-        // ==========================================
-        const WORDS_DATABASE = [
-            { haslo: "Woda", podpowiedzi: ["Życie", "Przezroczystość", "Niezbędne"] },
-            { haslo: "Słońce", podpowiedzi: ["Jasność", "Góra", "Energia"] },
-            { haslo: "Księżyc", podpowiedzi: ["Cykl", "Noc", "Srebro"] },
-            { haslo: "Deszcz", podpowiedzi: ["Chmury", "Spadanie", "Mokro"] },
-            { haslo: "Śnieg", podpowiedzi: ["Biel", "Zimno", "Puch"] },
-            { haslo: "Ogień", podpowiedzi: ["Ciepło", "Niszczenie", "Czerwony"] },
-            { haslo: "Wiatr", podpowiedzi: ["Ruch", "Niewidzialne", "Chłód"] },
-            { haslo: "Pies", podpowiedzi: ["Wierność", "Domowe", "Opieka"] },
-            { haslo: "Kot", podpowiedzi: ["Niezależność", "Domowe", "Miękkość"] },
-            { haslo: "Ptak", podpowiedzi: ["Wolność", "Pióra", "Wysokość"] },
-            { haslo: "Drzewo", podpowiedzi: ["Korzeń", "Zieleń", "Drewno"] },
-            { haslo: "Kwiat", podpowiedzi: ["Zapach", "Kolor", "Prezent"] },
-            { haslo: "Trawa", podpowiedzi: ["Podłoże", "Zieleń", "Ogród"] },
-            { haslo: "Chleb", podpowiedzi: ["Codzienność", "Mąka", "Pieczone"] },
-            { haslo: "Masło", podpowiedzi: ["Tłuszcz", "Smarowanie", "Lodówka"] },
-            { haslo: "Ser", podpowiedzi: ["Mleko", "Dziury", "Dodatek"] },
-            { haslo: "Czekolada", podpowiedzi: ["Słodycz", "Kostka", "Brąz"] },
-            { haslo: "Sól", podpowiedzi: ["Smak", "Białe", "Kryształ"] },
-            { haslo: "Cukier", podpowiedzi: ["Słodycz", "Energia", "Białe"] },
-            { haslo: "Jajko", podpowiedzi: ["Początek", "Kruchość", "Białko"] },
-            { haslo: "Mleko", podpowiedzi: ["Biel", "Płyn", "Zdrowie"] },
-            { haslo: "Sok", podpowiedzi: ["Owoce", "Płyn", "Szklanka"] },
-            { haslo: "Zupa", podpowiedzi: ["Ciepło", "Talerz", "Mieszanie"] },
-            { haslo: "Mięso", podpowiedzi: ["Białko", "Siła", "Jedzenie"] },
-            { haslo: "Ryba", podpowiedzi: ["Woda", "Łuska", "Pływanie"] },
-            { haslo: "Owoc", podpowiedzi: ["Słodycz", "Drzewo", "Witaminy"] },
-            { haslo: "Warzywo", podpowiedzi: ["Zdrowie", "Ziemia", "Kolor"] },
-            { haslo: "Szkoła", podpowiedzi: ["Nauka", "Budynek", "Wiedza"] },
-            { haslo: "Praca", podpowiedzi: ["Zarobek", "Obowiązek", "Czas"] },
-            { haslo: "Pieniądze", podpowiedzi: ["Wartość", "Metal", "Papier"] },
-            { haslo: "Portfel", podpowiedzi: ["Zasoby", "Kieszeń", "Skóra"] },
-            { haslo: "Torba", podpowiedzi: ["Przechowywanie", "Uchwyt", "Ciężar"] },
-            { haslo: "Buty", podpowiedzi: ["Podłoże", "Para", "Krok"] },
-            { haslo: "Koszulka", podpowiedzi: ["Bawełna", "Ciało", "Kolor"] },
-            { haslo: "Spodnie", podpowiedzi: ["Nogi", "Kieszeń", "Materiał"] },
-            { haslo: "Kurtka", podpowiedzi: ["Zimno", "Zewnątrz", "Zamek"] },
-            { haslo: "Czapka", podpowiedzi: ["Głowa", "Ciepło", "Góra"] },
-            { haslo: "Zegar", podpowiedzi: ["Rytm", "Pomiar", "Wskazówka"] },
-            { haslo: "Łóżko", podpowiedzi: ["Poziom", "Odpoczynek", "Miękko"] },
-            { haslo: "Stół", podpowiedzi: ["Płaszczyzna", "Nogi", "Spotkanie"] },
-            { haslo: "Krzesło", podpowiedzi: ["Odpoczynek", "Nogi", "Siedzenie"] },
-            { haslo: "Okno", podpowiedzi: ["Widok", "Szyba", "Światło"] },
-            { haslo: "Drzwi", podpowiedzi: ["Przejście", "Bariera", "Uchwyt"] },
-            { haslo: "Lampa", podpowiedzi: ["Światło", "Jasność", "Prąd"] },
-            { haslo: "Komputer", podpowiedzi: ["Ekran", "Praca", "Narzędzie"] },
-            { haslo: "Internet", podpowiedzi: ["Sieć", "Informacja", "Połączenie"] },
-            { haslo: "Książka", podpowiedzi: ["Wiedza", "Papier", "Strona"] },
-            { haslo: "Gazeta", podpowiedzi: ["Informacja", "Dzień", "Papier"] },
-            { haslo: "Film", podpowiedzi: ["Obraz", "Historia", "Ekran"] },
-            { haslo: "Muzyka", podpowiedzi: ["Dźwięk", "Rytm", "Emocje"] },
-            { haslo: "Radio", podpowiedzi: ["Dźwięk", "Fala", "Głos"] },
-            { haslo: "Telefon", podpowiedzi: ["Kontakt", "Kieszeń", "Ekran"] },
-            { haslo: "Aparat", podpowiedzi: ["Pamiątka", "Obraz", "Chwila"] },
-            { haslo: "Samochód", podpowiedzi: ["Ruch", "Szybkość", "Cel"] },
-            { haslo: "Autobus", podpowiedzi: ["Ludzie", "Ruch", "Przystanek"] },
-            { haslo: "Pociąg", podpowiedzi: ["Tor", "Ruch", "Dworzec"] },
-            { haslo: "Rower", podpowiedzi: ["Koła", "Siła", "Ruch"] },
-            { haslo: "Samolot", podpowiedzi: ["Wysokość", "Podróż", "Powietrze"] },
-            { haslo: "Statek", podpowiedzi: ["Woda", "Fala", "Podróż"] },
-            { haslo: "Miasto", podpowiedzi: ["Budynki", "Tłum", "Hałas"] },
-            { haslo: "Wieś", podpowiedzi: ["Cisza", "Natura", "Przestrzeń"] },
-            { haslo: "Dom", podpowiedzi: ["Bezpieczeństwo", "Rodzina", "Ściany"] },
-            { haslo: "Mieszkanie", podpowiedzi: ["Sąsiedzi", "Piętro", "Blok"] },
-            { haslo: "Las", podpowiedzi: ["Drzewa", "Zieleń", "Cisza"] },
-            { haslo: "Plaża", podpowiedzi: ["Piasek", "Woda", "Lato"] },
-            { haslo: "Park", podpowiedzi: ["Odpoczynek", "Ławka", "Spacer"] },
-            { haslo: "Sklep", podpowiedzi: ["Wymiana", "Półka", "Zakupy"] },
-            { haslo: "Apteka", podpowiedzi: ["Pomoc", "Biel", "Zdrowie"] },
-            { haslo: "Kino", podpowiedzi: ["Sala", "Ekran", "Ciemność"] },
-            { haslo: "Teatr", podpowiedzi: ["Scena", "Sztuka", "Aktor"] },
-            { haslo: "Łóżko", podpowiedzi: ["Odpoczynek", "Poziom", "Miękko"] },
-            { haslo: "Telefon", podpowiedzi: ["Kontakt", "Ekran", "Bliskość"] },
-            { haslo: "Telewizor", podpowiedzi: ["Salon", "Obraz", "Przekaz"] },
-            { haslo: "Prysznic", podpowiedzi: ["Woda", "Start", "Odświeżenie"] },
-            { haslo: "Lodówka", podpowiedzi: ["Zasób", "Chłód", "Kuchnia"] },
-            { haslo: "Samochód", podpowiedzi: ["Ruch", "Metal", "Kierunek"] },
-            { haslo: "Zegarek", podpowiedzi: ["Czas", "Nadgarstek", "Ruch"] },
-            { haslo: "Klucze", podpowiedzi: ["Dostęp", "Metal", "Dźwięk"] },
-            { haslo: "Pieniądze", podpowiedzi: ["Wymiana", "Wartość", "Papier"] },
-            { haslo: "Plecak", podpowiedzi: ["Ciężar", "Wyjście", "Pamięć"] },
-            { haslo: "Pralka", podpowiedzi: ["Wirowanie", "Zapach", "Ubranie"] },
-            { haslo: "Lustro", podpowiedzi: ["Odbicie", "Szkło", "Prawda"] },
-            { haslo: "Drzwi", podpowiedzi: ["Przejście", "Bariera", "Klamka"] },
-            { haslo: "Zapalniczka", podpowiedzi: ["Ogień", "Kieszeń", "Klik"] },
-            { haslo: "Słuchawki", podpowiedzi: ["Dźwięk", "Izolacja", "Uszy"] },
-            { haslo: "Siłownia", podpowiedzi: ["Ruch", "Wysiłek", "Miejsce"] },
-            { haslo: "Kino", podpowiedzi: ["Ekran", "Ciemność", "Dźwięk"] },
-            { haslo: "Basen", podpowiedzi: ["Ruch", "Wilgoć", "Sport"] },
-            { haslo: "Góry", podpowiedzi: ["Wysokość", "Natura", "Widok"] },
-            { haslo: "Morze", podpowiedzi: ["Horyzont", "Sól", "Piasek"] },
-            { haslo: "Rower", podpowiedzi: ["Koła", "Droga", "Napęd"] },
-            { haslo: "Las", podpowiedzi: ["Zieleń", "Cisza", "Powietrze"] },
-            { haslo: "TikTok", podpowiedzi: ["Scroll", "Dźwięk", "Szybko"] },
-            { haslo: "YouTube", podpowiedzi: ["Wideo", "Wiedza", "Czas"] },
-            { haslo: "Minecraft", podpowiedzi: ["Klocki", "Świat", "Praca"] },
-            { haslo: "Szachy", podpowiedzi: ["Głowa", "Ruch", "Plan"] },
-            { haslo: "Klub", podpowiedzi: ["Noc", "Ludzie", "Rytm"] },
-            { haslo: "Narty", podpowiedzi: ["Puch", "Zjazd", "Zima"] },
-            { haslo: "Koncert", podpowiedzi: ["Głośno", "Scena", "Emocje"] },
-            { haslo: "Kręgle", podpowiedzi: ["Ciężar", "Precyzja", "Tor"] },
-            { haslo: "Kebab", podpowiedzi: ["Miasto", "Szybko", "Ciepło"] },
-            { haslo: "Sushi", podpowiedzi: ["Zimno", "Kształt", "Estetyka"] },
-            { haslo: "Burger", podpowiedzi: ["Warstwy", "Ręce", "Klasyk"] },
-            { haslo: "Frytki", podpowiedzi: ["Ziemia", "Sól", "Złoto"] },
-            { haslo: "Pizza", podpowiedzi: ["Dzielenie", "Trójkąt", "Wieczór"] },
-            { haslo: "Lody", podpowiedzi: ["Temperatura", "Słodycz", "Lato"] },
-            { haslo: "Piwo", podpowiedzi: ["Spotkanie", "Gorycz", "Szkło"] },
-            { haslo: "Kawa", podpowiedzi: ["Poranek", "Rytuał", "Energia"] },
-            { haslo: "Pączek", podpowiedzi: ["Tłuszcz", "Koło", "Tradycja"] },
-            { haslo: "Rosół", podpowiedzi: ["Dom", "Zupa", "Niedziela"] },
-            { haslo: "Zapiekanka", podpowiedzi: ["Chrupkość", "Długość", "Ulica"] },
-            { haslo: "Popcorn", podpowiedzi: ["Dźwięk", "Oczekiwanie", "Lekkość"] },
-            { haslo: "Hot Dog", podpowiedzi: ["Stacja", "Prostota", "Przekąska"] },
-            { haslo: "Pierogi", podpowiedzi: ["Wnętrze", "Mąka", "Woda"] },
-            { haslo: "Herbata", podpowiedzi: ["Liście", "Kubek", "Ciepło"] }
-        ];
-
-        // ==========================================
-        // 🕵️‍♂️ DANE: IMPOSTOR (PYTANIA)
-        // { haslo: "Pytanie dla grupy", qImp: "Pytanie dla Impostora" }
-        // ==========================================
-        const QUES_DATABASE = [
-            { haslo: "Jaki jest twój ulubiony kolor?", qImp: "Jakiego koloru ścian nie chciał byś mieć w pokoju?" },
-            { haslo: "Który z gracz najszybciej poszedł by do pierdla?", qImp: "Który z graczy najbardziej unika problemów" },
-            { haslo: "Jakie jest twoje ulubione danie?", qImp: "Jakiego dania nie chciał byś jeść do końca życia" },
-            { haslo: "Który z graczy jest najmądrzejszy", qImp: "Który z graczy jest najbardziej wygadany" },
-            { haslo: "Co lubisz robić w wolnym czasie", qImp: "Czego nie lubisz robisz a większość lubi" },
-            { haslo: "Największy red flag u płci przeciwnej", qImp: "Co cie najbardziej jara w płci przeciwnej" },
-            { haslo: "Jaki jest twój ulubiony sport", qImp: "Którego sportu najbardziej nie rozumiesz" },
-            { haslo: "Który z graczy jest najbardziej odpowiedzialny", qImp: "Któremu z graczy nie dał byś w opiekę dziecka" },
-            { haslo: "Który z graczy najszybciej zostałby milionerem?", qImp: "Który z graczy najszybciej wydałby całą wypłatę w jeden dzień?" },
-            { haslo: "Twoje wymarzone miejsce na wakacje?", qImp: "Miejsce, w którym za darmo byś nie zamieszkał(a)?" },
-            { haslo: "Który z graczy jest największym flirciarzem?", qImp: "Który z graczy jest najbardziej nieśmiały w nowym towarzystwie?" },
-            { haslo: "Z którym graczem chciałbyś utknąć na bezludnej wyspie?", qImp: "Z którym graczem najtrudniej byłoby ci się dogadać w stresującej sytuacji?" },
-            { haslo: "Co robisz najpierw po przebudzeniu?", qImp: "Czego  absolutnie nie cierpisz robić rano?" },
-            { haslo: "Który z graczy ma najdziwniejsze hobby?", qImp: "Który z graczy jest najbardziej przewidywalny i spokojny?" },
-            { haslo: "Jaki był twój ulubiony przedmiot w szkole?", qImp: "Z którego przedmiotu w szkole miałeś najgorsze oceny?" },
-            { haslo: "Który z graczy najlepiej gotuje?", qImp: "Po czyim gotowaniu najbardziej bałbyś się o swój żołądek?" },
-            { haslo: "Jaka cecha charakteru jest najlepsza?", qImp: "Jaka cecha charakteru bywa najbardziej irytująca?" },
-            { haslo: "W jakim zawodzie najlepiej odnalazłbyś się?", qImp: "W jakiej pracy  kompletnie bys sobie nie poradził(a)?" },
-            { haslo: "Jaki napój najczęściej pijesz do obiadu?", qImp: "Co zazwyczaj zamawiasz, gdy jesteś w kawiarni?" },
-            { haslo: "O której godzinie zazwyczaj kładziesz się spać?", qImp: "O której godzinie kończy się dla Ciebie wieczór?" },
-            { haslo: "W jakim sklepie najczęściej zostawiasz pieniądze?", qImp: "Gdzie zazwyczaj kupujesz ubrania?" },
-            { haslo: "Co zazwyczaj jesz na śniadanie?", qImp: "Co najchętniej zjadłbyś na szybko w ciągu dnia?" },
-            { haslo: "Bez jakiego gadżetu nie wychodzisz z domu?", qImp: "Co masz zawsze pod ręką, gdy siedzisz przy biurku?" },
-            { haslo: "Ile czasu dziennie spędzasz na telefonie?", qImp: "Ile czasu zajmuje Ci ranna rutyna w łazience?" },
-            { haslo: "Jaki jest Twój ulubiony owoc?", qImp: "Z jakiego owocu sok wybierasz najczęściej?" },
-            { haslo: "Jaki kolor dominuje w Twojej szafie?", qImp: "Jaki kolor najbardziej pasuje do Twojej osobowości?" },
-            { haslo: "Czym najczęściej dojeżdżasz do szkoły/pracy?", qImp: "Jaki jest według Ciebie najwygodniejszy środek transportu?" },
-            { haslo: "Jaki gatunek filmowy lubisz najbardziej?", qImp: "Jaki typ seriali najczęściej wybierasz na wieczór?" },
-            { haslo: "Gdzie najchętniej chodzisz na spacer?", qImp: "W jakim otoczeniu czujesz się najbardziej zrelaksowany?" },
-            { haslo: "Jaki sport lubiłeś uprawiać w dzieciństwie?", qImp: "Oglądanie jakiej dyscypliny sportowej sprawia Ci frajdę?" },
-            { haslo: "Jaki jest Twój ulubiony dzień tygodnia?", qImp: "Który dzień tygodnia jest dla Ciebie najbardziej produktywny?" },
-            { haslo: "W jakim języku chciałbyś umieć mówić płynnie?", qImp: "Jaki język jest dla ciebie najbardziej dziwny" },
-            { haslo: "Jaka jest Twoja ulubiona pora roku?", qImp: "Jaka pora roku jest najbrzydsza" },
-            { haslo: "Ulubiony składnik pizzy?", qImp: "Jaki składnik musi się znaleźć w Twoim ulubionym fast-foodzie?" },
-            { haslo: "Co lubisz robić, gdy na dworze pada deszcz?", qImp: "Jaki jest Twój ulubiony sposób na nudę w domu?" },
-            { haslo: "Z jakiego portalu społecznościowego korzystasz najwięcej?", qImp: "Gdzie najczęściej szukasz ciekawych filmików lub zdjęć?" },
-            { haslo: "Gdybyś mógł mieć egzotyczne zwierzę, co by to było?", qImp: "Jakie egzotyczne zwierzę najbardziej Cię fascynuje?" },
-            { haslo: "Czego najbardziej nie lubisz robić w domu?", qImp: "Jaki obowiązek domowy zawsze odkładasz na później?" },
-            { haslo: "Kim chciałeś zostać, jak byłeś mały?", qImp: "W jakiej pracy mógłbyś się odnaleźć?" },
-            { haslo: "Co jest Twoim największym talentem?", qImp: "W czym czujesz się lepszy od większości ludzi?" },
-            { haslo: "Jaki temat jest Twoim ulubiony?", qImp: "O czym mógłbyś rozmawiać godzinami bez przygotowania?" },
-            { haslo: "Z czego najczęściej się śmiejesz?", qImp: "Jaki typ żartów najbardziej do Ciebie trafia?" },
-            { haslo: "Co najbardziej irytuje Cię u innych ludzi?", qImp: "Jakie zachowanie sprawia, że tracisz do kogoś cierpliwość?" },
-            { haslo: "O której godzinie zazwyczaj jesz obiad?", qImp: "O której godzinie czujesz największy głód w ciągu dnia?" },
-            { haslo: "Ulubione święto w roku?", qImp: "Na jakim święcie najbardziej lubisz się spotykać z rodziną?" },
-            { haslo: "Jaki jest Twój ulubiony sposób na spędzanie czasu z ekipą?", qImp: "Co zazwyczaj robicie, gdy spotykacie się wieczorem?" },
-            { haslo: "W jakiej restauracji w okolicy jedzenie jest najlepsze?", qImp: "Gdzie najchętniej idziesz, gdy nie chce Ci się gotować?" },
-            { haslo: "Jaki alkohol najczęściej pojawia się na imprezach?", qImp: "Co najlepiej pasuje do picia podczas wspólnego grania?" },
-            { haslo: "Jaka gra planszowa/karciana jest Waszą ulubioną?", qImp: "Przy jakiej grze zawsze jest u Was najwięcej kłótni?" },
-            { haslo: "Kto z nas jest najbardziej punktualny?", qImp: "Kto z nas zawsze przejmuje inicjatywę przy planowaniu wyjść?" },
-            { haslo: "Jaki utwór muzyczny kojarzy Ci się z wakacjami?", qImp: "Przy jakiej piosence zawsze masz ochotę podgłośnić radio?" },
-            { haslo: "Gdzie najczęściej robisz zakupy spożywcze?", qImp: "Do jakiego sklepu masz najbliżej z domu?" },
-            { haslo: "Jaką supermoc chciałbyś posiadać?", qImp: "Jaka supermoc ułatwiłaby Ci codzienne życie?" },
-            { haslo: "Co najbardziej lubisz robić w internecie?", qImp: "Na co marnujesz najwięcej czasu przed ekranem?" }
-        ];
-
-        // ==========================================
-        // 🧬 DANE: THE TEST
-        // ==========================================
-        const TEST_QUESTIONS = [
-            { q: "Ulubiony sposób na relaks?", o: ["Sen", "Serial", "Sport"], type: "select" },
-            { q: "Jaki jest mój ulubiony sposób na spędzanie wolnego czasu?", o: ["Oglądanie seriali/filmów", "Wyjście ze znajomymi", "Sport lub hobby"], type: "select" },
-            { q: "Gdybym mógł/mogła zjeść tylko jedną rzecz do końca życia, co by to było?", o: ["Pizza", "Kebab", "Domowy obiad"], type: "select" },
-            { q: "Czego najbardziej nie lubię robić w domu?", o: ["Zmywać naczyń", "Sprzątać", "Wynosić śmieci"], type: "select" },
-            { q: "Jaki jest mój wymarzony kierunek podróży?", o: ["Egzotyczna plaża", "Europejska stolica", "Góry lub dzika natura"], type: "select" },
-            { q: "Jaki był/jest mój ulubiony przedmiot w szkole?", o: ["Języki obce / polski", "Matematyka / ścisłe", "WF"], type: "select" },
-            { q: "Co mnie najbardziej irytuje u innych ludzi?", o: ["Spóźnialstwo", "Kłamanie", "Głośne zachowanie"], type: "select" },
-            { q: "W jakiej sytuacji najczęściej tracę cierpliwość?", o: ["Gdy coś mi nie wychodzi", "Gdy ktoś robi coś czego nie chce", "Gdy jestem głodny/a lub niewyspany/a"], type: "select" },
-            { q: "Kim chciałem/am zostać, jak byłem/am mały/a?", o: ["Piosenkarzem/ką lub Aktorem/ką", "Lekarzem/ką lub Weterynarzem", "Nauczycielem/ką"], type: "select" },
-            { q: "Jaki jest mój styl ubierania się na co dzień?", o: ["Typowy dresiarz / oversize", "Elegancko i dopasowanie", "Casual (dżinsy i t-shirt)"], type: "select" },
-            { q: "Która cecha Twojego charakteru najbardziej mnie czasem denerwuje?", o: ["Upartość", "Toksyczność", "Głupota"], type: "select" },
-            { q: "Jaka jest twoja ulubiona piosenka?", type: "input" },
-            { q: "Ulubiony wykonawca muzyczny?", type: "input" },
-            { q: "Najlepszy gatunek muzyczny?", o: ["Rap", "Disco Polo", "Hip-hop"], type: "select" },
-            { q: "Ulubiona pora dnia drugiej osoby?", type: "input" },
-            { q: "Czego druga osoba słucha najczęściej?", type:"input" },
-            { q: "Ulubiony napój procentowy?",type:"input" },
-            { q: "?", o: ["", "", ""] },
-            { q: "?", o: ["", "", ""] },
-            { q: "?", o: ["", "", ""] },
-            { q: "?", o: ["", "", ""] },
-            { q: "?", o: ["", "", ""] },
-            { q: "?", o: ["", "", ""] },
-            { q: "Kto pierwszy wyciąga rękę po kłótni?", o: ["Ja", "Ty", "Zależy"] }
-        ];
-
-        // ==========================================
-        // ⚙️ LOGIKA GRY
-        // ==========================================
         const firebaseConfig = { apiKey: "AIzaSyAQLLZui2v4j3nLLKXhp2brcqsgSyy0W2s", databaseURL: "https://menu-gier-default-rtdb.europe-west1.firebasedatabase.app" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let myNick = "", activeRoom = "", currentImpMode = "words", hintsEnabled = false, activeTestRelId = "";
+        let myNick = "", activeRoom = "", currentImpMode = "words", activeTestRelId = "";
+
+        // ==========================================
+        // 🕵️‍♂️ LOGIKA: IMPOSTOR
+        // ==========================================
+        const WORDS_DATABASE = [ { haslo: "Woda", podpowiedzi: ["Płyn"] }, { haslo: "Pizza", podpowiedzi: ["Włochy"] } ];
+        const QUES_DATABASE = [ { haslo: "Ulubiony kolor?", qImp: "Kolor którego nienawidzisz?" } ];
 
         function nav(id) { document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
 
-        // IMPOSTOR LOGIC
         function setImpMode(m) {
             currentImpMode = m;
             document.getElementById('btn-m-w').classList.toggle('active', m === 'words');
             document.getElementById('btn-m-q').classList.toggle('active', m === 'questions');
-            document.getElementById('hint-option-box').style.display = m === 'words' ? 'flex' : 'none';
         }
-        function toggleHints() { hintsEnabled = !hintsEnabled; document.getElementById('hint-status').innerText = hintsEnabled ? "ON" : "OFF"; document.getElementById('hint-status').style.color = hintsEnabled ? "var(--success)" : "var(--danger)"; }
 
         function startImpostor(isHost) {
             myNick = document.getElementById('imp-nick').value.trim(); activeRoom = document.getElementById('imp-room').value.trim();
-            if (!myNick || !activeRoom) return alert("Wpisz nick i kod!");
+            if (!myNick || !activeRoom) return alert("Wpisz dane!");
             const ref = db.ref('impostor_v8/' + activeRoom);
             if (isHost) {
                 const secret = currentImpMode === 'words' ? WORDS_DATABASE[Math.floor(Math.random() * WORDS_DATABASE.length)] : QUES_DATABASE[Math.floor(Math.random() * QUES_DATABASE.length)];
-                ref.set({ host: myNick, mode: currentImpMode, state: 'waiting', secret, hintsOn: hintsEnabled });
+                ref.set({ host: myNick, mode: currentImpMode, state: 'waiting', secret, answers: null });
             }
             ref.child('players/' + myNick).set(true); listenImpostor(); nav('screen-impostor-game');
+        }
+
+        function submitImpAnswer() {
+            const val = document.getElementById('imp-answer-input').value.trim();
+            if(!val) return;
+            db.ref('impostor_v8/' + activeRoom + '/answers/' + myNick).set(val);
+            document.getElementById('imp-answer-section').classList.add('hidden');
         }
 
         function listenImpostor() {
@@ -480,21 +159,22 @@
                 document.getElementById('imp-display-room').innerText = "Pokój: " + activeRoom;
                 document.getElementById('imp-players').innerHTML = Object.keys(d.players || {}).map(p => `<div style="padding:5px">${p}</div>`).join('');
                 if (d.host === myNick && d.state === 'waiting') document.getElementById('imp-start-btn').style.display = 'block';
+                
                 if (d.state === 'revealed') {
-                    document.getElementById('imp-waiting').classList.add('hidden'); document.getElementById('imp-role-card').classList.remove('hidden');
+                    document.getElementById('imp-waiting').classList.add('hidden'); 
+                    document.getElementById('imp-role-card').classList.remove('hidden');
                     const isImp = d.impostors.includes(myNick);
                     document.getElementById('role-title').innerText = isImp ? "IMPOSTOR" : "GRACZ";
                     document.getElementById('role-title').style.color = isImp ? "var(--danger)" : "var(--success)";
+                    document.getElementById('role-value').innerText = isImp ? (d.mode === 'words' ? "???" : d.secret.qImp) : (d.mode === 'words' ? d.secret.haslo : d.secret.haslo);
+                    
+                    if(d.mode === 'questions') document.getElementById('imp-answer-section').classList.remove('hidden');
 
-                    let val = "";
-                    if (isImp) {
-                        if (d.mode === 'words') val = d.hintsOn ? "Podpowiedź: " + d.secret.podpowiedzi[0] : "???";
-                        else val = d.secret.qImp; // Pytanie alternatywne dla Impostora
-                    } else {
-                        val = d.secret.haslo;
+                    if(d.answers) {
+                        document.getElementById('imp-results-area').classList.remove('hidden');
+                        const ansList = Object.values(d.answers).sort();
+                        document.getElementById('imp-all-answers').innerHTML = ansList.map(a => `<div class="reveal-item">${a}</div>`).join('');
                     }
-                    document.getElementById('role-value').innerText = val;
-                    document.getElementById('role-desc').innerText = isImp ? "Twoje zadanie to wtopić się w tłum. Odpowiadaj sprytnie!" : "Wszyscy gracze widzą to samo. Znajdź zdrajcę!";
                 }
             });
         }
@@ -502,31 +182,31 @@
         function revealRoles() {
             const ref = db.ref('impostor_v8/' + activeRoom);
             ref.once('value', s => {
-                const data = s.val(); const players = Object.keys(data.players);
-                const imps = players.sort(() => 0.5 - Math.random()).slice(0, Math.max(1, Math.floor(players.length / 4)));
-                let secret = JSON.parse(JSON.stringify(data.secret));
-                if (secret.haslo.includes("{gracz}")) {
-                    const randomP = players[Math.floor(Math.random() * players.length)];
-                    secret.haslo = secret.haslo.replace(/{gracz}/g, randomP);
-                    if (secret.qImp) secret.qImp = secret.qImp.replace(/{gracz}/g, randomP);
-                }
-                ref.update({ state: 'revealed', impostors: imps, secret });
+                const p = Object.keys(s.val().players);
+                const imps = [p[Math.floor(Math.random()*p.length)]];
+                ref.update({ state: 'revealed', impostors: imps });
             });
         }
         function leaveImpostor() { db.ref('impostor_v8/' + activeRoom).off(); nav('screen-launcher'); }
 
-        // THE TEST LOGIC
-        function handleTestAutoLogin() {
-            const s = localStorage.getItem('kamil_test_nick');
-            if (s) { myNick = s; enterTestDash(); } else nav('screen-test-auth');
+        // ==========================================
+        // 🧬 LOGIKA: THE TEST
+        // ==========================================
+        const TEST_QUESTIONS = [
+            { q: "Ulubione jedzenie?", o: ["Pizza", "Sushi", "Burger"], type: "select" },
+            { q: "Twoje największe marzenie?", type: "input" }
+        ];
+
+        function handleTestAutoLogin() { 
+            const s = localStorage.getItem('kamil_test_nick'); 
+            if (s) { myNick = s; enterTestDash(); } else nav('screen-test-auth'); 
         }
 
         function testLogin() {
-            myNick = document.getElementById('test-nick').value.trim();
+            myNick = document.getElementById('test-nick').value.trim(); 
             const pin = document.getElementById('test-pin').value.trim();
-            if (!myNick || pin.length < 4) return alert("Nick i PIN!");
             db.ref('test_v6/users/' + myNick).once('value', s => {
-                if (s.exists() && s.val().pin !== pin) return alert("Błędny PIN!");
+                if (s.exists() && s.val().pin !== pin) return alert("Błąd!");
                 if (!s.exists()) db.ref('test_v6/users/' + myNick).set({ nick: myNick, pin });
                 localStorage.setItem('kamil_test_nick', myNick); enterTestDash();
             });
@@ -534,7 +214,6 @@
 
         function enterTestDash() {
             nav('screen-test-dash');
-            document.getElementById('test-user-name').innerText = "Cześć, " + myNick;
             db.ref('test_v6/rels').on('value', s => {
                 const list = document.getElementById('test-list'); list.innerHTML = "";
                 const data = s.val() || {};
@@ -543,16 +222,14 @@
                         const partner = id.replace(myNick, "").replace("_", "");
                         const d = document.createElement('div'); d.className = "main-btn";
                         d.innerHTML = `<strong>${partner}</strong> ${data[id].turn === myNick ? '<span style="float:right;color:var(--success)">TWÓJ RUCH</span>' : ''}`;
-                        d.onclick = () => openTestGame(id, partner);
-                        list.appendChild(d);
+                        d.onclick = () => openTestGame(id, partner); list.appendChild(d);
                     }
                 });
             });
         }
 
         function newTestRel() {
-            const t = document.getElementById('test-target').value.trim();
-            if (!t || t === myNick) return;
+            const t = document.getElementById('test-target').value.trim(); if (!t || t === myNick) return;
             const id = [myNick, t].sort().join("_");
             db.ref('test_v6/rels/' + id).set({ level: 1, xp: 0, turn: myNick, step: 'ASKING', idx: 0, pack: [0, 1].map(() => Math.floor(Math.random() * TEST_QUESTIONS.length)), ans: [], gus: [] });
         }
@@ -561,43 +238,28 @@
             activeTestRelId = id; nav('screen-test-play');
             db.ref('test_v6/rels/' + id).on('value', s => {
                 const d = s.val(); if (!d || activeTestRelId !== id) return;
-
                 if (d.step === 'REVEAL' && d.turn === myNick) { showTestReveal(d); return; }
-
+                
                 document.getElementById('test-lvl').innerText = "POZIOM " + d.level;
                 document.getElementById('test-xp-f').style.width = (d.xp / (d.level * 300) * 100) + "%";
                 const banner = document.getElementById('test-action-banner');
                 const qArea = document.getElementById('test-options'); qArea.innerHTML = "";
 
                 if (d.turn === myNick) {
-                    const qObj = TEST_QUESTIONS[d.pack[d.idx]];
+                    const qObj = TEST_QUESTIONS[d.pack[d.idx]]; 
                     document.getElementById('test-q').innerText = qObj.q;
                     banner.className = d.step === 'ASKING' ? 'status-asking' : 'status-guessing';
                     banner.innerText = d.step === 'ASKING' ? "📋 Odpowiedz o sobie" : `🎯 Co wybrał(a) ${partner}?`;
 
                     if (qObj.type === "input") {
-                        qArea.innerHTML = `
-                    <input type="text" id="test-custom-ans" placeholder="Wpisz odpowiedź...">
-                    <button class="action-btn" onclick="const v = document.getElementById('test-custom-ans').value; if(v) handleTestMove('${id}', ${JSON.stringify(d).replace(/"/g, '&quot;')}, v, '${partner}')">WYŚLIJ</button>
-                `;
+                        qArea.innerHTML = `<input type="text" id="t-inp"><button class="action-btn" onclick="handleTestMove('${id}', ${JSON.stringify(d).replace(/"/g, '&quot;')}, document.getElementById('t-inp').value, '${partner}')">WYŚLIJ</button>`;
                     } else {
-                        qObj.o.forEach(o => {
-                            const b = document.createElement('button'); b.className = "action-btn"; b.innerText = o;
-                            b.onclick = () => handleTestMove(id, d, o, partner);
-                            qArea.appendChild(b);
+                        qObj.o.forEach(o => { 
+                            const b = document.createElement('button'); b.className="action-btn"; b.innerText=o; 
+                            b.onclick=() => handleTestMove(id, d, o, partner); qArea.appendChild(b); 
                         });
                     }
-                } else {
-                    banner.className = ""; banner.innerText = "⏳ CZEKAJ...";
-                    document.getElementById('test-q').innerText = `Ruch partnera (${partner})`;
-                }
-
-                const dots = document.getElementById('test-dots'); dots.innerHTML = "";
-                for (let i = 0; i < d.pack.length; i++) {
-                    const dot = document.createElement('div');
-                    dot.style.cssText = `width:30px; height:5px; border-radius:5px; background:${i < d.idx ? 'var(--success)' : (i === d.idx ? 'var(--accent)' : '#334155')}`;
-                    dots.appendChild(dot);
-                }
+                } else { document.getElementById('test-q').innerText = "Czekaj na partnera..."; }
             });
         }
 
@@ -605,53 +267,26 @@
             const ref = db.ref('test_v6/rels/' + id);
             if (data.step === 'ASKING') {
                 let a = data.ans || []; a.push(val);
-                if (a.length >= data.pack.length) {
-                    ref.update({ ans: a, step: 'GUESSING', idx: 0, turn: partner });
-                } else {
-                    ref.update({ ans: a, idx: data.idx + 1 });
-                }
+                if (a.length >= data.pack.length) ref.update({ ans: a, step: 'GUESSING', idx: 0, turn: partner });
+                else ref.update({ ans: a, idx: data.idx + 1 });
             } else {
                 let g = data.gus || []; g.push(val);
-                if (g.length >= data.pack.length) {
-                    ref.update({ gus: g, step: 'REVEAL', turn: partner });
-                } else {
-                    ref.update({ gus: g, idx: data.idx + 1 });
-                }
+                if (g.length >= data.pack.length) ref.update({ gus: g, step: 'REVEAL', turn: partner }); // Tura wraca do autora by ocenił
+                else ref.update({ gus: g, idx: data.idx + 1 });
             }
         }
 
         function showTestReveal(d) {
             nav('screen-test-reveal');
-            const list = document.getElementById('test-rev-list');
-            const partnerNick = activeTestRelId.replace(myNick, "").replace("_", "");
-            list.innerHTML = `<h3>Weryfikacja</h3><p style="font-size:0.7rem; margin-bottom:15px; opacity:0.8">Zaznacz poprawne strzały gracza ${partnerNick}.</p>`;
+            const list = document.getElementById('test-rev-list'); list.innerHTML = "";
             window.tempMatches = [];
-
             d.pack.forEach((qi, i) => {
-                const isMatch = String(d.ans[i] || "").trim().toLowerCase() === String(d.gus[i] || "").trim().toLowerCase();
+                const isMatch = String(d.ans[i]).toLowerCase() === String(d.gus[i]).toLowerCase();
                 window.tempMatches[i] = isMatch;
-
-                const item = document.createElement('div');
-                item.className = "reveal-item";
+                const item = document.createElement('div'); item.className = "reveal-item";
                 item.style.borderLeft = isMatch ? "4px solid var(--success)" : "4px solid var(--danger)";
-                item.style.cursor = "pointer";
-                item.onclick = () => {
-                    window.tempMatches[i] = !window.tempMatches[i];
-                    item.style.borderLeft = window.tempMatches[i] ? "4px solid var(--success)" : "4px solid var(--danger)";
-                    document.getElementById(`status-text-${i}`).innerText = window.tempMatches[i] ? 'UZNANE ✅' : 'ODRZUCONE ❌';
-                    document.getElementById(`status-text-${i}`).style.color = window.tempMatches[i] ? 'var(--success)' : 'var(--danger)';
-                };
-
-                item.innerHTML = `
-            <small>${TEST_QUESTIONS[qi].q}</small><br>
-            <div style="margin-top:5px; font-size:0.9rem">
-                <b>Twoja:</b> <span style="color:var(--accent)">${d.ans[i]}</span><br>
-                <b>Strzał:</b> <span style="color:var(--xp)">${d.gus[i]}</span>
-            </div>
-            <div id="status-text-${i}" style="text-align:right; font-weight:800; font-size:0.7rem; color:${isMatch ? 'var(--success)' : 'var(--danger)'}">
-                ${isMatch ? 'UZNANE ✅' : 'ODRZUCONE ❌'}
-            </div>
-        `;
+                item.innerHTML = `<small>${TEST_QUESTIONS[qi].q}</small><br>Ty: ${d.ans[i]} | Partner: ${d.gus[i]}`;
+                item.onclick = () => { window.tempMatches[i] = !window.tempMatches[i]; item.style.borderLeft = window.tempMatches[i] ? "4px solid var(--success)" : "4px solid var(--danger)"; };
                 list.appendChild(item);
             });
         }
@@ -659,25 +294,12 @@
         function testConfirmReveal() {
             const ref = db.ref('test_v6/rels/' + activeTestRelId);
             ref.once('value', s => {
-                const d = s.val(); let matches = 0;
-                const partnerNick = activeTestRelId.replace(myNick, "").replace("_", "");
-                let hist = d.pack.map((qi, i) => {
-                    const m = window.tempMatches[i]; if (m) matches++;
-                    return { q: TEST_QUESTIONS[qi].q, a: d.ans[i], m: m };
-                });
-                let xp = d.xp + (matches * 100) + 20; let lvl = d.level;
-                if (xp >= lvl * 300) { xp = 0; lvl++; }
-                ref.update({
-                    level: lvl, xp, last: hist, ans: [], gus: [], idx: 0,
-                    step: 'ASKING', turn: partnerNick,
-                    pack: [0, 1].map(() => Math.floor(Math.random() * TEST_QUESTIONS.length))
-                });
+                const d = s.val(); let m = 0; window.tempMatches.forEach(v => { if(v) m++; });
+                const partner = activeTestRelId.replace(myNick, "").replace("_", "");
+                ref.update({ xp: d.xp + (m*100), step: 'ASKING', turn: partner, ans: [], gus: [], idx: 0 });
                 nav('screen-test-dash');
             });
         }
-
-        function testLogout() { localStorage.clear(); nav('screen-launcher'); }
-        function testLogout() { localStorage.clear(); nav('screen-launcher'); }
     </script>
 </body>
 </html>
